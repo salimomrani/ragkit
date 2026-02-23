@@ -1,0 +1,30 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Frontend (Angular)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start", "--prefix", "frontend"],
+      "port": 4200
+    },
+    {
+      "name": "Backend (FastAPI)",
+      "runtimeExecutable": "/Users/salimomrani/code/_Autres/PALO/backend/.venv/bin/uvicorn",
+      "runtimeArgs": [
+        "main:app",
+        "--reload",
+        "--port",
+        "8000",
+        "--app-dir",
+        "/Users/salimomrani/code/_Autres/PALO/.claude/worktrees/xenodochial-meninsky/backend"
+      ],
+      "port": 8000
+    },
+    {
+      "name": "Database (PostgreSQL)",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "up", "-d"],
+      "port": 5444
+    }
+  ]
+}
