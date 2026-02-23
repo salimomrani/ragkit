@@ -8,10 +8,16 @@
 
 ## Workflow (mandatory)
 
-- **Feature or large change** → see `.claude/skills/speckit-superpowers-workflow.md`
+- **Feature or large change** → use `/speckit.workflow` (see `.claude/commands/speckit.workflow.md`)
 - **Frontend work** → see `.claude/skills/angular-conventions.md`
 - **Python/backend** → see `.claude/skills/python-conventions.md`
 - **Small fix** (typo, label, 1-2 lines) → direct edit, no spec
+
+### Workflow routing (auto)
+
+When my instruction indicates a **feature / composant / module / workflow complet / implémentation non triviale**, Claude should automatically route to `/speckit.workflow` first, then follow the speckit + superpowers pipeline.
+
+If I explicitly indicate a **small fix** (typo, wording, label, 1-2 lignes, doc-only), Claude should skip `/speckit.workflow` and edit directly.
 
 ## TDD (mandatory)
 
