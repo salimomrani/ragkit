@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 export interface HistoryEntry {
   role: 'user' | 'assistant';
@@ -70,6 +71,7 @@ export interface LogEntry {
 @Injectable({ providedIn: 'root' })
 export class RagApiService {
   private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
   private readonly apiUrl = environment.apiUrl;
 
   query(question: string): Observable<QueryResponse> {
@@ -79,9 +81,13 @@ export class RagApiService {
   streamQuery(question: string, history: HistoryEntry[] = []): Observable<StreamEvent> {
     return new Observable((observer) => {
       const controller = new AbortController();
+      const token = this.authService.token();
       fetch(`${this.apiUrl}/query/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ question, history }),
         signal: controller.signal,
       })

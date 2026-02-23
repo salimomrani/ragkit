@@ -39,3 +39,10 @@
 ## Scroll / DOM timing
 
 - DOM reads after render: always use `setTimeout(() => { ... })` — never rely on `ngAfterViewChecked` with OnPush
+
+## Linting
+
+- ESLint with Angular plugin
+- Prettier for formatting
+- `npm run lint` before every commit
+- Never silence ESLint errors to make lint pass (`eslint-disable`, file-level disables, inline suppressions, or config exceptions). Fix the code instead.

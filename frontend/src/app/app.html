@@ -9,6 +9,9 @@
       <a routerLink="/ingest" routerLinkActive="active">Ingest</a>
       <a routerLink="/logs" routerLinkActive="active">Logs</a>
       <a routerLink="/eval" routerLinkActive="active">Éval</a>
+      @if (isAuthenticated()) {
+        <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+      }
     </div>
   </nav>
 

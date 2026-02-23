@@ -159,6 +159,7 @@
 | Frontend unit tests         | ✅ added   | Vitest-based test suite for Angular components (005)         |
 | CI/CD pipeline              | ✅ added   | GitHub Actions: path-filtered lint + test jobs (006)         |
 | Chat session memory         | ✅ added   | Session-scoped history (last 6 turns) passed per query (007) |
+| User authentication (JWT)   | ✅ added   | Was Out of Scope in constitution — explicit product requirement; username/password + JWT; all 5 Core Principles respected (008) |
 
 ---
 

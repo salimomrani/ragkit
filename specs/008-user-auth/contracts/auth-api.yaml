@@ -1,0 +1,168 @@
+openapi: "3.1.0"
+info:
+  title: PALO RAG Auth API
+  version: "1.0.0"
+
+paths:
+  /api/v1/auth/login:
+    post:
+      summary: Authenticate user and obtain JWT access token
+      tags: [auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            example:
+              username: admin
+              password: secret
+      responses:
+        "200":
+          description: Successful login — returns Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+              example:
+                access_token: eyJhbGciOiJIUzI1NiJ9...
+                token_type: bearer
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+              example:
+                detail: Invalid username or password
+
+  /api/v1/auth/me:
+    get:
+      summary: Return current authenticated user info
+      tags: [auth]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user identity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfo"
+              example:
+                username: admin
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+
+  # All existing endpoints now require authentication (401 on missing/invalid token)
+  /api/v1/query:
+    post:
+      summary: (protected) RAG query
+      tags: [query]
+      security:
+        - bearerAuth: []
+      # ... (existing contract unchanged, auth added)
+
+  /api/v1/query/stream:
+    post:
+      summary: (protected) RAG streaming query
+      tags: [query]
+      security:
+        - bearerAuth: []
+
+  /api/v1/ingest:
+    post:
+      summary: (protected) Ingest document
+      tags: [ingest]
+      security:
+        - bearerAuth: []
+
+  /api/v1/documents:
+    get:
+      summary: (protected) List documents
+      tags: [ingest]
+      security:
+        - bearerAuth: []
+
+  /api/v1/logs:
+    get:
+      summary: (protected) Query logs
+      tags: [logs]
+      security:
+        - bearerAuth: []
+
+  /api/v1/evaluation/run:
+    post:
+      summary: (protected) Run evaluation
+      tags: [evaluation]
+      security:
+        - bearerAuth: []
+
+  /api/v1/evaluation/report:
+    get:
+      summary: (protected) Get evaluation report
+      tags: [evaluation]
+      security:
+        - bearerAuth: []
+
+  /health:
+    get:
+      summary: (public) Health check
+      tags: [system]
+      security: []
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              example:
+                status: ok
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+
+    TokenResponse:
+      type: object
+      required: [access_token, token_type]
+      properties:
+        access_token:
+          type: string
+          description: Signed JWT token
+        token_type:
+          type: string
+          enum: [bearer]
+
+    UserInfo:
+      type: object
+      required: [username]
+      properties:
+        username:
+          type: string
+
+    ErrorDetail:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string

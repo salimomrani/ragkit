@@ -87,7 +87,8 @@ export class Chat {
         if (event.type === 'meta') {
           const seen = new Map<string, { source: string; excerpt: string; score: number }>();
           for (const s of event.sources) {
-            if (!seen.has(s.source) || s.score > seen.get(s.source)!.score) seen.set(s.source, s);
+            const existing = seen.get(s.source);
+            if (!existing || s.score > existing.score) seen.set(s.source, s);
           }
           this.messages.update((msgs) =>
             msgs.map((m) =>

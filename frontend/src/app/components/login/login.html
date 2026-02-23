@@ -1,0 +1,47 @@
+<section class="login-wrapper">
+  <div class="login-card">
+    <header class="login-header">
+      <p class="eyebrow">Secure Access</p>
+      <h1>Palo RAG Login</h1>
+      <p class="subtitle">Connectez-vous pour acceder au chat, aux logs et aux outils d'evaluation.</p>
+    </header>
+
+    <form class="login-form" (ngSubmit)="onSubmit()">
+      <label>
+        <span>Username</span>
+        <input
+          name="username"
+          type="text"
+          [ngModel]="username()"
+          (ngModelChange)="username.set($event)"
+          autocomplete="username"
+          [disabled]="isLoading()"
+        />
+      </label>
+
+      <label>
+        <span>Password</span>
+        <input
+          name="password"
+          type="password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          autocomplete="current-password"
+          [disabled]="isLoading()"
+        />
+      </label>
+
+      @if (error()) {
+        <p class="error-message" role="alert">{{ error() }}</p>
+      }
+
+      <button type="submit" [disabled]="isLoading()">
+        @if (isLoading()) {
+          <span>Connexion...</span>
+        } @else {
+          <span>Se connecter</span>
+        }
+      </button>
+    </form>
+  </div>
+</section>

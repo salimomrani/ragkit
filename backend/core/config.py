@@ -32,6 +32,13 @@ class Settings(BaseSettings):
     guardrail_min_length: int = 6
     guardrail_max_length: int = 500
 
+    # Auth / JWT
+    jwt_secret_key: str = "CHANGE_ME_IN_PRODUCTION"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_hours: int = 8
+    demo_username: str = "admin"
+    demo_password_hash: str = ""
+
     # API tuning
     default_logs_limit: int = 100
     cors_allow_origins: str = "http://localhost:4200"
