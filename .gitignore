@@ -30,3 +30,6 @@ Thumbs.db
 # IDE
 .idea/
 .vscode/
+
+# Local debrief docs (do not push)
+debrif/
