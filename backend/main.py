@@ -19,7 +19,7 @@ from core.logging import get_logger
 
 logger = get_logger(__name__)
 
-app = FastAPI(title="PALO RAG API", version="1.0.0")
+app = FastAPI(title="PALO RAG API", version="1.0.0", redoc_url=None)
 
 app.add_middleware(
     CORSMiddleware,
