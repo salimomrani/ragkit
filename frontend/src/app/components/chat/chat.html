@@ -57,8 +57,9 @@
 
   <div class="input-area">
     <textarea
+      #promptInput
       [value]="prompt()"
-      (input)="prompt.set($any($event.target).value)"
+      (input)="prompt.set(promptInput.value)"
       (keydown)="onKeydown($event)"
       placeholder="Posez une question… (Entrée pour envoyer, Maj+Entrée pour un saut de ligne)"
       [disabled]="isLoading()"

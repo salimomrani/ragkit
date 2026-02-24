@@ -12,6 +12,7 @@
 
 - Control flow: `@if`, `@for`, `@switch` (not `*ngIf`, `*ngFor`)
 - 2-space indentation
+- **Never use `$any()` in templates**. For event targets, prefer template reference variables (e.g. `<input #myInput (input)="doSomething(myInput.value)">`) instead of `$any($event.target).value`.
 
 ## RxJS & Signals
 

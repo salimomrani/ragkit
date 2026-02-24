@@ -6,13 +6,14 @@ import {
   OnInit,
   ChangeDetectionStrategy,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { RagApiService, Document } from '../../services/rag-api.service';
 
 @Component({
   selector: 'app-ingest',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './ingest.html',
   styleUrls: ['./ingest.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +31,22 @@ export class Ingest implements OnInit {
   // T001 — selection state
   selectedIds = signal<Set<string>>(new Set());
   isDeleting = signal(false);
+
+  // Search filter
+  searchQuery = signal<string>('');
+
+  // Filtered list (used in template)
+  filteredDocuments = computed(() => {
+    const q = this.searchQuery().trim().toLowerCase();
+    if (!q) return this.documents();
+    return this.documents().filter((d) => d.name.toLowerCase().includes(q));
+  });
+
+  // Aggregate stats (always from the full unfiltered list)
+  stats = computed(() => ({
+    totalDocs: this.documents().length,
+    totalChunks: this.documents().reduce((sum, d) => sum + d.chunk_count, 0),
+  }));
 
   // T002 — derived selection state
   allSelected = computed(
@@ -162,5 +179,37 @@ export class Ingest implements OnInit {
         this.isLoadingDocs.set(false);
       },
     });
+  }
+
+  formatDate(isoString: string): string {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / 86_400_000);
+
+    const formatted = date.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+
+    let relative: string;
+    if (diffMs < 60_000) {
+      relative = "à l'instant";
+    } else if (diffMs < 3_600_000) {
+      const mins = Math.floor(diffMs / 60_000);
+      relative = `il y a ${mins} min`;
+    } else if (diffDays === 0) {
+      const hrs = Math.floor(diffMs / 3_600_000);
+      relative = `il y a ${hrs} h`;
+    } else if (diffDays === 1) {
+      relative = 'hier';
+    } else if (diffDays < 30) {
+      relative = `il y a ${diffDays} j`;
+    } else {
+      relative = '';
+    }
+
+    return relative ? `${formatted} · ${relative}` : formatted;
   }
 }

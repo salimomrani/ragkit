@@ -1,4 +1,16 @@
 <div class="ingest-container">
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <span class="stat-value">{{ stats().totalDocs }}</span>
+      <span class="stat-label">Documents ingérés</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ stats().totalChunks }}</span>
+      <span class="stat-label">Chunks totaux</span>
+    </div>
+  </div>
+
   <section class="upload-card">
     <h2>Ingestion de documents</h2>
     <p>Ajoutez un fichier Markdown ou texte pour enrichir la base de connaissances.</p>
@@ -44,6 +56,14 @@
         Base de connaissances <span class="count">{{ documents().length }}</span>
       </h3>
       <div class="toolbar">
+        <input
+          #searchInput
+          class="search-input"
+          type="search"
+          placeholder="Filtrer…"
+          [value]="searchQuery()"
+          (input)="searchQuery.set(searchInput.value)"
+        />
         <button
           class="btn-delete-selected"
           (click)="deleteSelected()"
@@ -72,6 +92,8 @@
         <p class="muted">Chargement…</p>
       } @else if (documents().length === 0) {
         <p class="muted">Aucun document ingéré.</p>
+      } @else if (filteredDocuments().length === 0) {
+        <p class="muted">Aucun résultat pour « {{ searchQuery() }} ».</p>
       } @else {
         <table class="doc-table">
           <thead>
@@ -86,11 +108,12 @@
               </th>
               <th>Nom</th>
               <th>Chunks</th>
+              <th>Ingéré le</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            @for (doc of documents(); track doc.id) {
+            @for (doc of filteredDocuments(); track doc.id) {
               <tr [class.selected]="selectedIds().has(doc.id)">
                 <td class="td-checkbox">
                   <input
@@ -101,6 +124,7 @@
                 </td>
                 <td class="doc-name">{{ doc.name }}</td>
                 <td class="doc-meta">{{ doc.chunk_count }} chunks</td>
+                <td class="doc-date">{{ formatDate(doc.ingested_at) }}</td>
                 <td>
                   <button
                     class="btn-delete"
