@@ -1,10 +1,4 @@
-# PALO RAG — Project Instructions
-
-## Project Scope & Stack
-
-- **Backend**: Python 3.12, FastAPI, LangChain 0.3, ChromaDB (embedded), SQLAlchemy 2, PostgreSQL 16
-- **AI**: Ollama local (`qwen2.5:7b` + `mxbai-embed-large`) — `AIProvider` interface swappable
-- **Frontend**: Angular 21, PrimeNG v21
+# PALO RAG — Core Rules
 
 ## Workflow Routing (mandatory)
 
@@ -12,11 +6,6 @@
 - **Small fix** (typo, wording, label, 1-2 lines, docs-only, or explicitly called a small fix) → direct edit, no spec
 - **Frontend implementation conventions** → `.claude/skills/angular-conventions.md`
 - **Python/backend conventions** → `.claude/skills/python-conventions.md`
-
-### Auto-routing rule
-
-If the request is a feature/component/module/workflow-level task, route to `/speckit.workflow` first.  
-If the request is a small fix, skip Speckit and edit directly.
 
 ## TDD (mandatory)
 
@@ -30,7 +19,6 @@ If the request is a small fix, skip Speckit and edit directly.
 
 - Never push directly to `master` — always open a PR
 - Even if explicitly asked to "push", do not push to `master`; create/use a branch and open/update a PR instead (unless the user clearly requests an exception to this rule)
-- Tests must pass before any commit
 - Update `specs/<feature>/tasks.md` after each completed task during Speckit execution
 
 ## Architecture Constraints
@@ -53,7 +41,6 @@ Read `.specify/memory/constitution.md` before any architectural decision.
 - Backend (dev): `cd backend && .venv/bin/uvicorn main:app --reload --port 8000`
 - Frontend (dev): `cd frontend && npm start`
 - Backend health check: `curl http://127.0.0.1:8000/health`
-- Optional: ingest corpus after startup: `cd backend && .venv/bin/python scripts/ingest_corpus.py`
 
 ## Source of Truth
 
