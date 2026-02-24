@@ -1,42 +1,40 @@
 # PALO RAG — Project Instructions
 
-## Stack
+## Project Scope & Stack
 
 - **Backend**: Python 3.12, FastAPI, LangChain 0.3, ChromaDB (embedded), SQLAlchemy 2, PostgreSQL 16
 - **AI**: Ollama local (`qwen2.5:7b` + `mxbai-embed-large`) — `AIProvider` interface swappable
 - **Frontend**: Angular 21, PrimeNG v21
 
-## Workflow (mandatory)
+## Workflow Routing (mandatory)
 
-- **Feature or large change** → use `/speckit.workflow` (see `.claude/commands/speckit.workflow.md`)
-- **Frontend work** → see `.claude/skills/angular-conventions.md`
-- **Python/backend** → see `.claude/skills/python-conventions.md`
-- **Small fix** (typo, label, 1-2 lines) → direct edit, no spec
+- **Feature / non-trivial change** → use `/speckit.workflow` (see `.claude/commands/speckit.workflow.md`)
+- **Small fix** (typo, wording, label, 1-2 lines, docs-only, or explicitly called a small fix) → direct edit, no spec
+- **Frontend implementation conventions** → `.claude/skills/angular-conventions.md`
+- **Python/backend conventions** → `.claude/skills/python-conventions.md`
 
-### Workflow routing (auto)
+### Auto-routing rule
 
-When my instruction indicates a **feature / composant / module / workflow complet / implémentation non triviale**, Claude should automatically route to `/speckit.workflow` first, then follow the speckit + superpowers pipeline.
-
-If I explicitly indicate a **small fix** (typo, wording, label, 1-2 lignes, doc-only), Claude should skip `/speckit.workflow` and edit directly.
+If the request is a feature/component/module/workflow-level task, route to `/speckit.workflow` first.  
+If the request is a small fix, skip Speckit and edit directly.
 
 ## TDD (mandatory)
 
 **Iron law: no production code without a failing test first.** RED → GREEN → REFACTOR
 
-- Backend: `cd backend && .venv/bin/pytest tests/ -v`
-- Backend lint: `cd backend && .venv/bin/ruff check .`
-- Frontend: `cd frontend && npm test -- --watch=false`
-- Frontend lint: `cd frontend && npm run lint`
-- Lint must pass before any commit
-- Skill: `superpowers:test-driven-development`
+- Use `superpowers:test-driven-development` for features/bugfixes.
+- Tests and lint must pass before any commit.
+- Use the stack-specific commands from the repo and skill files (`angular-conventions.md`, `python-conventions.md`).
 
 ## Git
 
 - Never push directly to `master` — always open a PR
 - Tests must pass before any commit
-- Update `specs/<feature>/tasks.md` after each task
+- Update `specs/<feature>/tasks.md` after each completed task during Speckit execution
 
-## Architecture (read `.specify/memory/constitution.md` before any architectural decision)
+## Architecture Constraints
+
+Read `.specify/memory/constitution.md` before any architectural decision.
 
 1. Local-first — Ollama only, no data leaves the machine
 2. Traceability — every query logged (PII-masked)
@@ -49,15 +47,15 @@ If I explicitly indicate a **small fix** (typo, wording, label, 1-2 lignes, doc-
 - DB: `docker-compose up -d` (PostgreSQL 16, port 5444)
 - Ports: 8000 (backend), 4200 (frontend)
 
+## Run / Dev Commands
+
+- Backend (dev): `cd backend && .venv/bin/uvicorn main:app --reload --port 8000`
+- Frontend (dev): `cd frontend && npm start`
+- Backend health check: `curl http://127.0.0.1:8000/health`
+- Optional: ingest corpus after startup: `cd backend && .venv/bin/python scripts/ingest_corpus.py`
+
 ## Source of Truth
 
 - **Code > plan.md > tasks.md** — code wins on divergence
 - Deviations from spec → document in `DECISIONS.md`
-- Context7 for library docs (FastAPI, LangChain, Angular, SQLAlchemy, ChromaDB)
-
-## Active Technologies
-- Python 3.12 (backend), TypeScript 5.9 / Angular 21 (frontend) + FastAPI, LangChain 0.3, Pydantic v2 (backend); Angular 21, PrimeNG v21 (frontend) (007-chat-session-memory)
-- No new storage — history is ephemeral (client-side `messages` signal) (007-chat-session-memory)
-
-## Recent Changes
-- 007-chat-session-memory: Added Python 3.12 (backend), TypeScript 5.9 / Angular 21 (frontend) + FastAPI, LangChain 0.3, Pydantic v2 (backend); Angular 21, PrimeNG v21 (frontend)
+- Prefer Context7 for library/framework documentation to get the latest docs and APIs before implementation decisions

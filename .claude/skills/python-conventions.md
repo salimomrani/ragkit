@@ -11,13 +11,13 @@
 
 - `ruff` — config in `backend/ruff.toml`
 - Rules: E, F, I (errors, pyflakes, isort)
-- Run: `cd backend && .venv/bin/ruff check .`
+- Run: `cd backend && .venv/bin/ruff check .` (fallback: `ruff check .` if `ruff` is not installed in `.venv`)
 
 ## Testing
 
 - `pytest` + `pytest-asyncio`
 - Run: `cd backend && .venv/bin/pytest tests/ -v`
-- Mocks: all Ollama calls mocked in tests (Ollama not available in CI)
+- Mocks: Ollama calls should be mocked in unit tests / CI (Ollama not available in CI)
 - DB: SQLite in-memory for unit tests; PostgreSQL service for integration
 
 ## Architecture modules
@@ -26,7 +26,7 @@
 - `guardrails/input.py` — input validation (empty → min_len → max_len → injection → offensive)
 - `rag/pipeline.py` — RAG chain (embed → retrieve → generate)
 - `api/` — FastAPI routers
-- `providers/` — AIProvider interface (swappable: Ollama, future: OpenAI)
+- `rag/provider.py` — AIProvider interface + provider selection (swappable: Ollama, future: OpenAI)
 
 ## Key constraints
 
