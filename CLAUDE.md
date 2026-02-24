@@ -29,6 +29,7 @@ If the request is a small fix, skip Speckit and edit directly.
 ## Git
 
 - Never push directly to `master` — always open a PR
+- Even if explicitly asked to "push", do not push to `master`; create/use a branch and open/update a PR instead (unless the user clearly requests an exception to this rule)
 - Tests must pass before any commit
 - Update `specs/<feature>/tasks.md` after each completed task during Speckit execution
 
