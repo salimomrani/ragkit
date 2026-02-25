@@ -4,8 +4,8 @@
 
 - **Feature / non-trivial change** → use `/speckit.workflow` (see `.claude/commands/speckit.workflow.md`)
 - **Small fix** (typo, wording, label, 1-2 lines, docs-only, or explicitly called a small fix) → direct edit, no spec
-- **Frontend implementation conventions** → `.claude/skills/angular-conventions.md`
-- **Python/backend conventions** → `.claude/skills/python-conventions.md`
+- **Frontend implementation conventions** → `~/.claude/skills/angular-conventions.md`
+- **Python/backend conventions** → `~/.claude/skills/python-conventions.md`
 
 ## TDD (mandatory)
 
@@ -17,7 +17,6 @@
 
 ## Git
 
-- Never push directly to `master` — always open a PR
 - Even if explicitly asked to "push", do not push to `master`; create/use a branch and open/update a PR instead (unless the user clearly requests an exception to this rule)
 - Update `specs/<feature>/tasks.md` after each completed task during Speckit execution
 
@@ -46,4 +45,3 @@ Read `.specify/memory/constitution.md` before any architectural decision.
 
 - **Code > plan.md > tasks.md** — code wins on divergence
 - Deviations from spec → document in `DECISIONS.md`
-- Prefer Context7 for library/framework documentation to get the latest docs and APIs before implementation decisions
