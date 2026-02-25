@@ -30,3 +30,6 @@ Thumbs.db
 # IDE
 .idea/
 .vscode/
+
+# Debrief prep (local only)
+debrief/
