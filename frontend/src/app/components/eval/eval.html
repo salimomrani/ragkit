@@ -1,17 +1,26 @@
 <div class="eval-container">
   <div class="eval-header">
     <h2>Rapport d'évaluation</h2>
-    <button class="btn-run" (click)="runEval()" [disabled]="isRunning() || isLoading()">
-      @if (isRunning()) {
-        Évaluation en cours…
-      } @else {
-        Lancer l'évaluation
-      }
-    </button>
+    <div class="eval-actions">
+      <button class="btn-run" (click)="runEval()" [disabled]="isRunning() || isLoading()">
+        @if (isRunning()) {
+          Évaluation en cours…
+        } @else {
+          Lancer l'évaluation
+        }
+      </button>
+      <button class="btn-refresh" (click)="fetchReport()" [disabled]="isLoading()">
+        Rafraîchir
+      </button>
+    </div>
   </div>
 
   @if (error()) {
     <div class="alert error">{{ error() }}</div>
+  }
+
+  @if (info()) {
+    <div class="alert info">{{ info() }}</div>
   }
 
   @if (isLoading()) {
@@ -54,7 +63,6 @@
             <th>Question</th>
             <th>Source attendue</th>
             <th>Trouvée</th>
-            <th>Longueur réponse</th>
           </tr>
         </thead>
         <tbody>
@@ -68,7 +76,6 @@
                   {{ item.source_found ? '✓' : '✗' }}
                 </span>
               </td>
-              <td class="cell-len">{{ item.answer_length }}</td>
             </tr>
           }
         </tbody>

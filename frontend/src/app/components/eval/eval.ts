@@ -17,9 +17,18 @@ export class Eval implements OnInit {
   isLoading = signal(true);
   isRunning = signal(false);
   error = signal<string | null>(null);
+  info = signal<string | null>(null);
 
   ngOnInit(): void {
     this.fetchReport();
+    this.api.getEvalStatus().subscribe({
+      next: ({ running }) => {
+        if (running) {
+          this.isRunning.set(true);
+          this.info.set('Une évaluation est en cours, veuillez patienter.');
+        }
+      },
+    });
   }
 
   fetchReport(): void {
@@ -40,14 +49,20 @@ export class Eval implements OnInit {
   runEval(): void {
     this.isRunning.set(true);
     this.error.set(null);
+    this.info.set(null);
     this.api.runEval().subscribe({
       next: () => {
-        this.fetchReport();
-        this.isRunning.set(false);
+        this.info.set(
+          'Évaluation lancée en arrière-plan. Rafraîchissez manuellement pour voir les résultats.',
+        );
       },
-      error: () => {
-        this.error.set("Erreur lors de l'évaluation.");
-        this.isRunning.set(false);
+      error: (err) => {
+        if (err.status === 409) {
+          this.info.set('Une évaluation est déjà en cours, veuillez patienter.');
+        } else {
+          this.error.set("Erreur lors du lancement de l'évaluation.");
+          this.isRunning.set(false);
+        }
       },
     });
   }

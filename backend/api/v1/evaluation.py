@@ -1,12 +1,13 @@
 import json
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from dependencies import get_engine, get_provider, get_vectorstore
 from models.db import EvaluationResult
 
 router = APIRouter(tags=["evaluation"])
+_running = False
 
 
 def _parse_per_question(value):
@@ -21,8 +22,14 @@ def _parse_per_question(value):
     return []
 
 
+@router.get("/evaluation/status")
+def evaluation_status():
+    return {"running": _running}
+
+
 @router.post("/evaluation/run")
 def run_quality_check(
+    background_tasks: BackgroundTasks,
     provider=Depends(get_provider),
     vectorstore=Depends(get_vectorstore),
     engine=Depends(get_engine),
@@ -32,16 +39,25 @@ def run_quality_check(
     from quality.report import generate_quality_report_md
     from quality.runner import run_quality_check as _run
 
-    scores = _run(provider=provider, vectorstore=vectorstore, engine=engine, limit=None)
+    global _running
+    if _running:
+        raise HTTPException(status_code=409, detail="in_progress")
 
-    # Generate the Markdown report
-    root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    reports_dir = os.path.join(root_dir, "reports")
-    os.makedirs(reports_dir, exist_ok=True)
-    report_path = os.path.join(reports_dir, "eval.md")
-    generate_quality_report_md(scores=scores, output_path=report_path)
+    def _run_and_report():
+        global _running
+        _running = True
+        try:
+            scores = _run(provider=provider, vectorstore=vectorstore, engine=engine, limit=None)
+            root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+            reports_dir = os.path.join(root_dir, "reports")
+            os.makedirs(reports_dir, exist_ok=True)
+            report_path = os.path.join(reports_dir, "eval.md")
+            generate_quality_report_md(scores=scores, output_path=report_path)
+        finally:
+            _running = False
 
-    return {"status": "completed", "scores": scores}
+    background_tasks.add_task(_run_and_report)
+    return {"status": "started"}
 
 
 @router.get("/evaluation/report")

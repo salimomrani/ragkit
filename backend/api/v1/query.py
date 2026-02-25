@@ -34,9 +34,10 @@ def query(
     engine=Depends(get_engine),
 ):
     logger.info("Query received: %d chars", len(request.question))
+    log_store = LogStore(engine=engine)
     check = _guardrail.check(request.question)
     if not check.passed:
-        LogStore(engine=engine).save(
+        log_store.save(
             question=request.question,
             retrieved_sources=[],
             similarity_scores=[],
@@ -48,7 +49,7 @@ def query(
         raise HTTPException(status_code=400, detail=check.reason)
 
     result = RAGPipeline(provider=provider, vectorstore=vectorstore).query(request.question, history=request.history)
-    LogStore(engine=engine).save(
+    log_store.save(
         question=request.question,
         retrieved_sources=[s["source"] for s in result.sources],
         similarity_scores=[s["score"] for s in result.sources],
@@ -74,9 +75,11 @@ def query_stream(
     vectorstore=Depends(get_vectorstore),
     engine=Depends(get_engine),
 ):
+    # Guardrail check before starting the stream to avoid unnecessary processing and resource usage
     check = _guardrail.check(request.question)
+    log_store = LogStore(engine=engine)
     if not check.passed:
-        LogStore(engine=engine).save(
+        log_store.save(
             question=request.question,
             retrieved_sources=[],
             similarity_scores=[],
@@ -88,8 +91,8 @@ def query_stream(
         raise HTTPException(status_code=400, detail=check.reason)
 
     pipeline = RAGPipeline(provider=provider, vectorstore=vectorstore)
-    log_store = LogStore(engine=engine)
 
+    # Generator function to yield SSE events as they are produced by the pipeline
     def generate():
         meta = None
         done = None
@@ -114,6 +117,7 @@ def query_stream(
                 guardrail_triggered=None,
             )
 
+    #    Return a streaming response with appropriate headers for SSE
     return StreamingResponse(
         generate(),
         media_type="text/event-stream",

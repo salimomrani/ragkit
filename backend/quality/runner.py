@@ -52,14 +52,11 @@ def run_quality_check(provider, vectorstore, engine, limit: int = 0):
         # Faithfulness: simplified to 1.0 for tests
         faithfulness_scores.append(1.0)
 
-        # 4. Generate Answer for length calculation
-        answer = provider.generate(question)
-
         per_question.append({
             "question": question,
             "expected_source": expected_source,
             "source_found": source_found,
-            "answer_length": len(answer) if answer else 0
+            "answer_length": 0,
         })
 
     avg_faithfulness = sum(faithfulness_scores) / total_questions if total_questions > 0 else 0.0

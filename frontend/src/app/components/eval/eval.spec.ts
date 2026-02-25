@@ -21,13 +21,15 @@ describe('Eval', () => {
   let fixture: ComponentFixture<Eval>;
   let mockApi: {
     getEvalReport: ReturnType<typeof vi.fn>;
+    getEvalStatus: ReturnType<typeof vi.fn>;
     runEval: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
     mockApi = {
       getEvalReport: vi.fn().mockReturnValue(of(mockReport)),
-      runEval: vi.fn().mockReturnValue(of({ status: 'ok', scores: {} })),
+      getEvalStatus: vi.fn().mockReturnValue(of({ running: false })),
+      runEval: vi.fn().mockReturnValue(of({ status: 'started' })),
     };
 
     await TestBed.configureTestingModule({
@@ -60,13 +62,13 @@ describe('Eval', () => {
     expect(component.avg()).toBe(0);
   });
 
-  it('runEval() calls the API and refreshes the report', async () => {
+  it('runEval() calls the API and sets info message', async () => {
     component.runEval();
     fixture.detectChanges();
     await fixture.whenStable();
     expect(mockApi.runEval).toHaveBeenCalled();
-    expect(mockApi.getEvalReport).toHaveBeenCalledTimes(2);
-    expect(component.isRunning()).toBe(false);
+    expect(component.isRunning()).toBe(true);
+    expect(component.info()).toContain('arrière-plan');
   });
 
   it('sets error signal when getEvalReport fails', async () => {
@@ -79,11 +81,20 @@ describe('Eval', () => {
   });
 
   it('sets error signal when runEval fails', async () => {
-    mockApi.runEval.mockReturnValue(throwError(() => new Error('fail')));
+    mockApi.runEval.mockReturnValue(throwError(() => ({ status: 500 })));
     component.runEval();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(component.error()).toBe("Erreur lors de l'évaluation.");
+    expect(component.error()).toBe("Erreur lors du lancement de l'évaluation.");
     expect(component.isRunning()).toBe(false);
+  });
+
+  it('sets info signal when runEval returns 409', async () => {
+    mockApi.runEval.mockReturnValue(throwError(() => ({ status: 409 })));
+    component.runEval();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.info()).toContain('déjà en cours');
+    expect(component.isRunning()).toBe(true);
   });
 });

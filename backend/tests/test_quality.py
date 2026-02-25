@@ -89,6 +89,18 @@ def test_runner_persists_evaluation_result(mock_provider, mock_vectorstore, engi
         assert result.faithfulness is not None
 
 
+def test_runner_does_not_call_generate(mock_provider, mock_vectorstore, engine):
+    from quality.runner import run_quality_check
+    run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine, limit=1)
+    mock_provider.generate.assert_not_called()
+
+
+def test_runner_answer_length_is_zero(mock_provider, mock_vectorstore, engine):
+    from quality.runner import run_quality_check
+    scores = run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine, limit=1)
+    assert scores["per_question"][0]["answer_length"] == 0
+
+
 def test_report_generates_markdown(mock_provider, mock_vectorstore, engine, tmp_path):
     from quality.report import generate_quality_report_md
     from quality.runner import run_quality_check
