@@ -180,3 +180,36 @@ def test_get_document_content(client):
 def test_get_document_content_not_found(client):
     r = client.get("/api/v1/documents/fake-uuid-123/content")
     assert r.status_code == 404
+
+
+def test_evaluation_run_returns_immediately(client):
+    r = client.post("/api/v1/evaluation/run")
+    assert r.status_code == 200
+    assert r.json()["status"] == "started"
+
+
+def test_evaluation_status_returns_running_false_by_default(client):
+    r = client.get("/api/v1/evaluation/status")
+    assert r.status_code == 200
+    assert r.json() == {"running": False}
+
+
+def test_evaluation_status_returns_running_true_when_running(client):
+    import api.v1.evaluation as eval_module
+    eval_module._running = True
+    try:
+        r = client.get("/api/v1/evaluation/status")
+        assert r.json() == {"running": True}
+    finally:
+        eval_module._running = False
+
+
+def test_evaluation_run_returns_in_progress_if_already_running(client):
+    import api.v1.evaluation as eval_module
+    eval_module._running = True
+    try:
+        r = client.post("/api/v1/evaluation/run")
+        assert r.status_code == 409
+        assert r.json()["detail"] == "in_progress"
+    finally:
+        eval_module._running = False

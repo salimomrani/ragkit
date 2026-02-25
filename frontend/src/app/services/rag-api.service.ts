@@ -156,7 +156,11 @@ export class RagApiService {
     return this.http.get<EvalReport>(`${this.apiUrl}/evaluation/report`);
   }
 
-  runEval(): Observable<{ status: string; scores: unknown }> {
-    return this.http.post<{ status: string; scores: unknown }>(`${this.apiUrl}/evaluation/run`, {});
+  getEvalStatus(): Observable<{ running: boolean }> {
+    return this.http.get<{ running: boolean }>(`${this.apiUrl}/evaluation/status`);
+  }
+
+  runEval(): Observable<{ status: string }> {
+    return this.http.post<{ status: string }>(`${this.apiUrl}/evaluation/run`, {});
   }
 }
