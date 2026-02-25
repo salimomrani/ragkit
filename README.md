@@ -102,7 +102,7 @@ docker-compose up -d
 cd backend
 python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt
 cp .env.example .env          # defaults: localhost:5444, palo/palo
-.venv/bin/python scripts/ingest_corpus.py   # load 15 corpus docs
+.venv/bin/python scripts/ingest_corpus.py   # load 16 corpus docs
 .venv/bin/uvicorn main:app --reload --port 8000
 
 # 3. Start frontend (new terminal)
@@ -178,7 +178,7 @@ Sample log entry (`GET /api/v1/logs`):
 ## Tests & Quality
 
 ```bash
-# Backend tests (TDD — 31 tests)
+# Backend tests (TDD — 48 tests)
 cd backend && .venv/bin/pytest tests/ -v
 
 # Backend lint (ruff)
@@ -237,12 +237,12 @@ PALO/
 │   ├── quality/         # Reference dataset, runner, report generator
 │   ├── models/          # SQLAlchemy models
 │   ├── ruff.toml        # Linter config (E/F/I rules, Python 3.12)
-│   └── tests/           # 31 tests (TDD)
+│   └── tests/           # 48 tests (TDD)
 ├── frontend/
 │   └── src/app/
 │       ├── components/  # Chat, Ingest, Logs, Eval (Angular 21 signals)
 │       └── services/    # RagApiService
-├── corpus/              # 15 synthetic Markdown knowledge base docs
+├── corpus/              # 16 synthetic Markdown knowledge base docs
 ├── reports/             # eval.md, costs.md
 └── docker-compose.yml   # PostgreSQL 16
 ```
