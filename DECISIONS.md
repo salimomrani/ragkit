@@ -41,7 +41,16 @@
 
 ---
 
-### 6. Input guardrails: regex, not LLM-as-judge
+### 6. Evaluation metrics: mocked faithfulness and answer_relevancy (MVP constraint)
+
+**Decision**: `faithfulness` and `answer_relevancy` scores are hardcoded to `1.0` in `quality/runner.py`; only `context_recall` is computed meaningfully (source presence check).
+**Rationale**: Local Ollama setup on a single machine cannot sustain 3 concurrent LLM calls per question (1 RAG answer + 1 faithfulness judge + 1 relevancy judge) × 15 questions = 45 sequential LLM calls without OOM/timeout risk.
+**Limit**: `faithfulness=1.0` and `answer_relevancy=1.0` are not real measurements — they are placeholders. The eval report scores are only meaningful for `context_recall`.
+**Next step**: Implement `quality/judge.py` with `score_faithfulness(provider, context, answer)` and `score_answer_relevancy(provider, question, answer)`, each calling the local LLM with a structured prompt returning `{"score": float}`. Activate once hardware or a hosted Ollama instance can handle the load without impacting concurrent user queries.
+
+---
+
+### 7. Input guardrails: regex, not LLM-as-judge
 
 **Alternative considered**: Send the question to a local LLM to validate whether it is relevant/appropriate (LLM-as-judge pattern) — eliminates the need for a pattern dictionary, better semantic coverage (indirect injection, paraphrased jailbreaks, off-topic questions phrased politely).
 **Decision**: Regex + wordlist for injection detection and offensive content filtering
@@ -51,7 +60,7 @@
 
 ---
 
-### 7. PII masking (regex-based, not ML)
+### 8. PII masking (regex-based, not ML)
 
 **Decision**: Regex patterns for emails, phone numbers, French SSN, credit cards
 **Rationale**: Sufficient for a demo corpus. No external dependencies, fully offline.
@@ -59,18 +68,19 @@
 
 ---
 
-### 8. RAG prompt design (context-first, no CoT, no few-shot)
+### 9. RAG prompt design (context-first, no CoT, no few-shot)
 
 **Decision**: Single-turn prompt — system persona + 4 strict rules + context block + question (`backend/rag/prompts.py`)
 **Alternatives considered**:
+
 - **Chain-of-Thought (CoT)**: Would increase answer quality on complex reasoning but adds tokens and latency; overkill for FAQ-style retrieval.
 - **Few-shot examples**: Improves output format consistency but hard-codes domain assumptions and inflates context window.
 - **Citation format** (e.g., `[Doc #1]`): Sources are already surfaced separately in the SSE `meta` event — embedding them in the LLM answer would create redundancy and hallucination risk on IDs.
-**Rationale**: The 4-rule instruction set (respond in French, stay grounded, refuse gracefully, no filler phrases) is the minimal effective prompt for a support RAG assistant. Rules are explicit rather than implied, making them auditable and easy to tune.
+  **Rationale**: The 4-rule instruction set (respond in French, stay grounded, refuse gracefully, no filler phrases) is the minimal effective prompt for a support RAG assistant. Rules are explicit rather than implied, making them auditable and easy to tune.
 
 ---
 
-### 9. LLM temperature = 0.1
+### 10. LLM temperature = 0.1
 
 **Default**: Ollama default ~0.8 (creative)
 **Decision**: `llm_temperature=0.1` (configurable via `LLM_TEMPERATURE` env var)
@@ -78,7 +88,7 @@
 
 ---
 
-### 10. `keep_alive=-1` on ChatOllama (LLM stays in GPU)
+### 11. `keep_alive=-1` on ChatOllama (LLM stays in GPU)
 
 **Default**: Ollama evicts models after ~5 min of inactivity
 **Decision**: `keep_alive=-1` on `ChatOllama` only (model stays loaded indefinitely while the backend runs)
@@ -86,7 +96,7 @@
 
 ---
 
-### 11. Audit log data retention (no TTL, no anonymisation beyond PII masking)
+### 12. Audit log data retention (no TTL, no anonymisation beyond PII masking)
 
 **Decision**: Query logs stored indefinitely in PostgreSQL; questions PII-masked at write time; no TTL, no user identity stored
 **Rationale**: For a local demo there is no regulatory constraint. PII masking at ingestion (emails, phone numbers) satisfies the minimal privacy requirement without a full GDPR retention policy.
@@ -94,7 +104,7 @@
 
 ---
 
-### 12. Chunk filename prefix for retrieval grounding
+### 13. Chunk filename prefix for retrieval grounding
 
 **Problem**: Context Recall was 0.47 — 8/15 questions failed to retrieve the expected source.
 **Root causes**: (1) quality runner used k=3 vs pipeline k=4; (2) queries like "ticket 001" had no semantic anchor (actual IDs: TKT-00142, etc.); (3) embedding distances placed wrong docs higher.
@@ -103,7 +113,7 @@
 
 ---
 
-### 13. Chat session memory — 6-turn default cap (spec says 10)
+### 14. Chat session memory — 6-turn default cap (spec says 10)
 
 **Spec**: history cap at 10 exchanges (20 messages)
 **Decision**: Frontend sends last 6 turns (12 messages); backend silently truncates to 10 entries
@@ -112,7 +122,7 @@
 
 ---
 
-### 14. GitHub Actions CI — path filtering, no deployment
+### 15. GitHub Actions CI — path filtering, no deployment
 
 **Decision**: Single `ci.yml` with 5 jobs: `changes` (path detection) + `backend-lint`, `backend-test`, `frontend-lint`, `frontend-test`
 **Path filtering**: `dorny/paths-filter@v3` — backend jobs fire only on `backend/**` changes, frontend jobs only on `frontend/**`
@@ -124,17 +134,18 @@
 
 ## Known Limitations
 
-| Limitation                      | Impact                                                 | Mitigation                                                                  |
-| ------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------- |
-| No document chunking overlap    | Adjacent context can be lost at chunk boundaries       | Add `chunk_overlap=100` in `RecursiveCharacterTextSplitter`                 |
-| No reranker                     | Top-4 retrieved chunks may not be the most relevant    | Add a cross-encoder reranker (e.g., `cross-encoder/ms-marco-MiniLM-L-6-v2`) |
-| Session memory (no persistence) | History resets on page reload; no named sessions or cross-session history | Add named persistent sessions per user/topic (see Next Steps #2)            |
-| No authentication               | Any client can ingest/delete documents                 | Add API key middleware or OAuth2 for production                             |
-| Corpus is synthetic             | 15 Markdown docs created for the demo                  | Replace with real internal docs                                             |
-| mxbai-embed-large context limit | 512-token context window (vs 8192 nomic)               | Ensure chunk_size ≤ 400 tokens in ingestion                                 |
-| Regex guardrails                | Injection/offensive detection via patterns, bypassable | Add a secondary LLM-based content moderation layer                          |
+| Limitation                      | Impact                                                                                               | Mitigation                                                                                                                                                  |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No document chunking overlap    | Adjacent context can be lost at chunk boundaries                                                     | Add `chunk_overlap=100` in `RecursiveCharacterTextSplitter`                                                                                                 |
+| No reranker                     | Top-4 retrieved chunks may not be the most relevant                                                  | Add a cross-encoder reranker (e.g., `cross-encoder/ms-marco-MiniLM-L-6-v2`)                                                                                 |
+| Session memory (no persistence) | History resets on page reload; no named sessions or cross-session history                            | Add named persistent sessions per user/topic (see Next Steps #2)                                                                                            |
+| No authentication               | Any client can ingest/delete documents                                                               | Add API key middleware or OAuth2 for production                                                                                                             |
+| Corpus is synthetic             | 15 Markdown docs created for the demo                                                                | Replace with real internal docs                                                                                                                             |
+| mxbai-embed-large context limit | 512-token context window (vs 8192 nomic)                                                             | Ensure chunk_size ≤ 400 tokens in ingestion                                                                                                                 |
+| Regex guardrails                | Injection/offensive detection via patterns, bypassable                                               | Add a secondary LLM-based content moderation layer                                                                                                          |
 | No semantic cache               | Every query hits the LLM regardless of prior identical/similar questions; wasted latency and compute | Add embedding-based cache: embed the question, find nearest cached entry (cosine similarity > threshold), return cached answer; invalidate on corpus update |
-| No data retention policy        | Logs accumulate indefinitely; no TTL, no erasure API   | Define retention period, add scheduled purge job, expose DELETE /logs/{id}  |
+| No data retention policy        | Logs accumulate indefinitely; no TTL, no erasure API                                                 | Define retention period, add scheduled purge job, expose DELETE /logs/{id}                                                                                  |
+| Mocked eval metrics             | `faithfulness` and `answer_relevancy` are hardcoded to `1.0`; only `context_recall` is real          | Implement `quality/judge.py` LLM-as-judge calls when hardware allows (see Decision #6)                                                                      |
 
 ---
 
