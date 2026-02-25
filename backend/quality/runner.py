@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from core.config import settings
 from models.db import EvaluationResult
 from quality.dataset import REFERENCE_DATASET
+from quality.judge import score_answer_relevancy, score_faithfulness
+from rag.prompts import RAG_PROMPT
 
 
 def run_quality_check(provider, vectorstore, engine, limit: int = 0):
@@ -41,22 +43,30 @@ def run_quality_check(provider, vectorstore, engine, limit: int = 0):
         # 2. Extract sources
         retrieved_sources = [doc.metadata.get("source", "") for doc, _ in docs_and_scores]
 
-        # 3. Compute metrics (mocked/simplified logic)
+        # 3. Context recall
         source_found = any(expected_source in s for s in retrieved_sources)
-        recall = 1.0 if source_found else 0.0
-        context_recall_scores.append(recall)
+        context_recall_scores.append(1.0 if source_found else 0.0)
 
-        # Answer Relevancy: simplified to 1.0 for tests
-        answer_relevancy_scores.append(1.0)
+        # 4. Build context string and generate answer
+        context_str = "\n\n".join(
+            f"[Source: {doc.metadata.get('source', 'unknown')}]\n{doc.page_content}"
+            for doc, _ in docs_and_scores
+        )
+        answer = provider.generate(RAG_PROMPT.format(context=context_str, question=question))
 
-        # Faithfulness: simplified to 1.0 for tests
-        faithfulness_scores.append(1.0)
+        # 5. LLM-as-judge scores
+        faithfulness = score_faithfulness(provider, context_str, answer)
+        relevancy = score_answer_relevancy(provider, question, answer)
+        faithfulness_scores.append(faithfulness)
+        answer_relevancy_scores.append(relevancy)
 
         per_question.append({
             "question": question,
             "expected_source": expected_source,
             "source_found": source_found,
-            "answer_length": 0,
+            "answer_length": len(answer),
+            "faithfulness_score": faithfulness,
+            "relevancy_score": relevancy,
         })
 
     avg_faithfulness = sum(faithfulness_scores) / total_questions if total_questions > 0 else 0.0

@@ -33,15 +33,17 @@ def generate_quality_report_md(scores: dict, output_path: str) -> None:
         "",
         "## Per-Question Results",
         "",
-        "| # | Question | Source Found | Answer Length |",
-        "|---|----------|-------------|---------------|",
+        "| # | Question | Source Found | Faithfulness | Relevancy | Answer Length |",
+        "|---|----------|-------------|-------------|-----------|---------------|",
     ]
 
     for i, item in enumerate(per_question, 1):
         q = item.get("question", "")[:60].replace("|", "\\|")
         source_found = "✓" if item.get("source_found") else "✗"
+        faithfulness_s = f"{item.get('faithfulness_score', 0.0):.2f}"
+        relevancy_s = f"{item.get('relevancy_score', 0.0):.2f}"
         answer_len = item.get("answer_length", 0)
-        lines.append(f"| {i} | {q} | {source_found} | {answer_len} |")
+        lines.append(f"| {i} | {q} | {source_found} | {faithfulness_s} | {relevancy_s} | {answer_len} |")
 
     lines += [
         "",

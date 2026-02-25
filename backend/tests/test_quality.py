@@ -1,3 +1,4 @@
+from itertools import cycle
 from unittest.mock import MagicMock
 
 import pytest
@@ -21,7 +22,12 @@ def engine():
 @pytest.fixture
 def mock_provider():
     provider = MagicMock()
-    provider.generate.return_value = "Réponse de test pour l'évaluation."
+    # Repeating pattern per question: RAG answer → faithfulness judge → relevancy judge
+    provider.generate.side_effect = cycle([
+        "Réponse de test pour l'évaluation.",
+        '{"score": 0.8}',
+        '{"score": 0.7}',
+    ])
     return provider
 
 
@@ -89,16 +95,27 @@ def test_runner_persists_evaluation_result(mock_provider, mock_vectorstore, engi
         assert result.faithfulness is not None
 
 
-def test_runner_does_not_call_generate(mock_provider, mock_vectorstore, engine):
+def test_runner_calls_generate_per_question(mock_provider, mock_vectorstore, engine):
     from quality.runner import run_quality_check
-    run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine, limit=1)
-    mock_provider.generate.assert_not_called()
+    run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine, limit=2)
+    # 3 generate calls per question: 1 RAG answer + 1 faithfulness judge + 1 relevancy judge
+    assert mock_provider.generate.call_count == 6
 
 
-def test_runner_answer_length_is_zero(mock_provider, mock_vectorstore, engine):
+def test_runner_answer_length_is_nonzero(mock_provider, mock_vectorstore, engine):
     from quality.runner import run_quality_check
     scores = run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine, limit=1)
-    assert scores["per_question"][0]["answer_length"] == 0
+    assert scores["per_question"][0]["answer_length"] > 0
+
+
+def test_runner_per_question_has_judge_scores(mock_provider, mock_vectorstore, engine):
+    from quality.runner import run_quality_check
+    scores = run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine, limit=1)
+    entry = scores["per_question"][0]
+    assert "faithfulness_score" in entry
+    assert "relevancy_score" in entry
+    assert entry["faithfulness_score"] == pytest.approx(0.8)
+    assert entry["relevancy_score"] == pytest.approx(0.7)
 
 
 def test_report_generates_markdown(mock_provider, mock_vectorstore, engine, tmp_path):
@@ -111,3 +128,18 @@ def test_report_generates_markdown(mock_provider, mock_vectorstore, engine, tmp_
     content = report_path.read_text()
     assert "faithfulness" in content.lower()
     assert "answer relevancy" in content.lower()
+
+
+def test_report_includes_per_question_judge_columns(mock_provider, mock_vectorstore, engine, tmp_path):
+    from quality.report import generate_quality_report_md
+    from quality.runner import run_quality_check
+    scores = run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine, limit=2)
+    report_path = tmp_path / "eval.md"
+    generate_quality_report_md(scores=scores, output_path=str(report_path))
+    content = report_path.read_text()
+    # The per-question table header must have both columns on the same line
+    header_line = next(
+        (line for line in content.splitlines() if "Source Found" in line), ""
+    )
+    assert "Faithfulness" in header_line
+    assert "Relevancy" in header_line

@@ -45,3 +45,10 @@ Read `.specify/memory/constitution.md` before any architectural decision.
 
 - **Code > plan.md > tasks.md** — code wins on divergence
 - Deviations from spec → document in `DECISIONS.md`
+
+## Active Technologies
+- Python 3.12 + FastAPI, LangChain-Chroma, Ollama (all existing) — no new packages (010-eval-llm-judge)
+- PostgreSQL 16 (per-question JSON field extended — no schema migration) (010-eval-llm-judge)
+
+## Recent Changes
+- 010-eval-llm-judge: Added Python 3.12 + FastAPI, LangChain-Chroma, Ollama (all existing) — no new packages

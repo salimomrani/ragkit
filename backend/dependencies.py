@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from sqlalchemy import create_engine
 
 from core.config import settings
