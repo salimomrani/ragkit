@@ -85,6 +85,29 @@ describe('Chat', () => {
     expect(mockApi.streamQuery).toHaveBeenCalledWith('question suivante', []);
   });
 
+  // Confidence badge visibility
+  it('should not show confidence badge when confidence >= 0.7', () => {
+    component.messages.set([{ id: '1', role: 'assistant', content: 'ok', confidence: 0.75 }]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.confidence')).toBeNull();
+  });
+
+  it('should show confidence badge without low class when 0.5 <= confidence < 0.7', () => {
+    component.messages.set([{ id: '1', role: 'assistant', content: 'ok', confidence: 0.55 }]);
+    fixture.detectChanges();
+    const el = fixture.nativeElement.querySelector('.confidence');
+    expect(el).not.toBeNull();
+    expect(el.classList.contains('low')).toBe(false);
+  });
+
+  it('should show confidence badge with low class when confidence < 0.5', () => {
+    component.messages.set([{ id: '1', role: 'assistant', content: 'ok', confidence: 0.35 }]);
+    fixture.detectChanges();
+    const el = fixture.nativeElement.querySelector('.confidence');
+    expect(el).not.toBeNull();
+    expect(el.classList.contains('low')).toBe(true);
+  });
+
   // T016 — US3: sendMessage caps history at 12 entries
   it('should send at most 12 history entries regardless of message count', () => {
     const manyMessages = Array.from({ length: 20 }, (_, i) => ({

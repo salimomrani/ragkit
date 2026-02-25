@@ -36,8 +36,8 @@
           </div>
         }
 
-        @if (msg.confidence !== undefined) {
-          <div class="confidence" [class.low]="msg.confidence < 0.6">
+        @if (msg.confidence !== undefined && msg.confidence < 0.7) {
+          <div class="confidence" [class.low]="msg.confidence < 0.5">
             Confiance : {{ msg.confidence * 100 | number: '1.0-0' }}%
           </div>
         }
