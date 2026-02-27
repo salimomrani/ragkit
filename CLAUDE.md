@@ -2,7 +2,7 @@
 
 ## Workflow Routing (mandatory)
 
-- **Feature / non-trivial change** → use `/speckit.workflow` (see `.claude/commands/speckit.workflow.md`)
+- **Feature / non-trivial change** → use `/speckit.workflow`
 - **Small fix** (typo, wording, label, 1-2 lines, docs-only, or explicitly called a small fix) → direct edit, no spec
 - **Frontend implementation conventions** → `~/.claude/skills/angular-conventions.md`
 - **Python/backend conventions** → `~/.claude/skills/python-conventions.md`
@@ -45,3 +45,4 @@ Read `.specify/memory/constitution.md` before any architectural decision.
 
 - **Code > plan.md > tasks.md** — code wins on divergence
 - Deviations from spec → document in `DECISIONS.md`
+

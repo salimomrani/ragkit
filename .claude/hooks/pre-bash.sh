@@ -18,10 +18,22 @@ COMMAND_STRIPPED=$(echo "$COMMAND" | awk '
   { print }
 ')
 
-# Block: npm install / uninstall (use 'cd frontend && npm install' or 'npm ci')
+# Block: npm install / uninstall outside frontend/
 if echo "$COMMAND_STRIPPED" | grep -qE '(^|[;&|[:space:]])npm[[:space:]]+(install|i|uninstall|un)(\s|$)'; then
-  echo "BLOCKED: 'npm install' is not allowed directly. Use 'cd frontend && npm install' or 'npm ci' inside frontend/." >&2
-  exit 2
+  current_dir=$(pwd)
+  in_frontend=0
+  # Allow if already inside frontend/ directory
+  if echo "$current_dir" | grep -qE '/frontend(/|$)'; then
+    in_frontend=1
+  fi
+  # Allow if command explicitly navigates into frontend/ first
+  if echo "$COMMAND_STRIPPED" | grep -qE '(^|[;&|[:space:]])cd[[:space:]]+([^;&|]*\/)?frontend([[:space:]]|$|/)'; then
+    in_frontend=1
+  fi
+  if [ "$in_frontend" -eq 0 ]; then
+    echo "BLOCKED: 'npm install' is only allowed inside frontend/. Run: cd frontend && npm install" >&2
+    exit 2
+  fi
 fi
 
 # Block: git push targeting master (explicit)

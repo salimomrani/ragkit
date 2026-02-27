@@ -13,7 +13,7 @@ def delete_by_source(vectorstore, source: str) -> None:
             try:
                 delete_fn(**kwargs)
                 return
-            except TypeError:
+            except (TypeError, ValueError):
                 continue
             except Exception as exc:
                 raise VectorStoreException(

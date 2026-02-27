@@ -28,6 +28,16 @@ def test_delete_by_source_falls_back_to_collection():
     collection.delete.assert_called_once_with(where={"source": "doc.md"})
 
 
+def test_delete_by_source_falls_back_to_collection_on_value_error():
+    """Chroma.delete raises ValueError (not TypeError) — must still reach collection fallback."""
+    vectorstore = MagicMock()
+    vectorstore.delete.side_effect = ValueError("wrong kwargs")
+    collection = MagicMock()
+    vectorstore._collection = collection
+    delete_by_source(vectorstore, "doc.md")
+    collection.delete.assert_called_once_with(where={"source": "doc.md"})
+
+
 def test_delete_by_source_raises_when_no_delete_api():
     vectorstore = MagicMock(delete=None)
     vectorstore._collection = None
