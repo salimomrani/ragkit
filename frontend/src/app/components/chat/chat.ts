@@ -178,7 +178,7 @@ export class Chat {
     if (!isPositive) {
       this.messages.update((m) =>
         m.map((item, i) =>
-          i === msgIndex ? { ...item, showComment: true, isPositive: false } : item,
+          i === msgIndex ? { ...item, showComment: true, isPositive: false, comment: '' } : item,
         ),
       );
       return;
@@ -220,7 +220,8 @@ export class Chat {
     const msg = msgs[msgIndex];
     if (!msg || !msg.logId || msg.submitting) return;
 
-    const comment = msg.comment?.trim() ? msg.comment.trim() : undefined;
+    const trimmed = msg.comment?.trim();
+    const comment = trimmed || undefined;
 
     this.messages.update((m) =>
       m.map((item, i) =>
@@ -236,7 +237,7 @@ export class Chat {
           this.messages.update((m) =>
             m.map((item, i) =>
               i === msgIndex
-                ? { ...item, isPositive: false, submitting: false, showComment: false }
+                ? { ...item, isPositive: false, submitting: false, showComment: false, comment: '' }
                 : item,
             ),
           );

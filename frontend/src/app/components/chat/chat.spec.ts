@@ -407,4 +407,30 @@ describe('Chat', () => {
 
     expect(mockApi.submitFeedback).toHaveBeenCalledWith('log-abc', false, undefined);
   });
+
+  it('should set feedbackError and clear submitting when submitWithComment fails', () => {
+    mockApi.submitFeedback.mockReturnValue(throwError(() => new Error('network error')));
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+        showComment: true,
+        comment: 'some comment',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitWithComment(0);
+    fixture.detectChanges();
+
+    expect(component.messages()[0].feedbackError).toBeTruthy();
+    expect(component.messages()[0].submitting).toBe(false);
+  });
 });
