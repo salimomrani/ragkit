@@ -76,6 +76,7 @@ export interface LogEntry {
   guardrail_triggered: string | null;
   rejected: boolean;
   rejection_reason: string | null;
+  feedback: FeedbackEntry | null;
 }
 
 export interface ConversationSummary {

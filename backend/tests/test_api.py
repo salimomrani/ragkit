@@ -523,6 +523,36 @@ def test_feedback_422_comment_too_long(client):
     assert any("Comment must not exceed 500 characters" in e["msg"] for e in r.json()["detail"])
 
 
+# T015 — US3: GET /logs includes feedback field
+def test_get_logs_entry_without_feedback_has_null_feedback(client):
+    client.post("/api/v1/query", json={"question": "Test log feedback null ?"})
+    r = client.get("/api/v1/logs")
+    assert r.status_code == 200
+    logs = r.json()
+    assert len(logs) > 0
+    assert logs[0]["feedback"] is None
+
+
+def test_get_logs_entry_with_feedback_has_correct_fields(client):
+    log_id = _create_log_entry(client)
+    r_fb = client.post(
+        "/api/v1/feedback",
+        json={"log_id": log_id, "is_positive": True, "comment": "Great answer"},
+    )
+    assert r_fb.status_code == 200
+
+    r = client.get("/api/v1/logs")
+    assert r.status_code == 200
+    logs = r.json()
+    target = next((entry for entry in logs if entry["id"] == log_id), None)
+    assert target is not None
+    fb = target["feedback"]
+    assert fb is not None
+    assert fb["is_positive"] is True
+    assert fb["comment"] == "Great answer"
+    assert "updated_at" in fb
+
+
 # T025 — US2: Most recent session appears first
 def test_get_history_ordered_most_recent_first(client):
     import time
