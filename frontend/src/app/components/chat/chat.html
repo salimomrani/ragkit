@@ -69,6 +69,35 @@
                 <span class="feedback-error">{{ msg.feedbackError }}</span>
               }
             </div>
+            @if (msg.showComment) {
+              <div class="feedback-comment">
+                <textarea
+                  class="comment-textarea"
+                  [ngModel]="msg.comment"
+                  (ngModelChange)="updateComment($index, $event)"
+                  placeholder="Commentaire optionnel…"
+                  rows="3"
+                ></textarea>
+                <div class="comment-footer">
+                  <span
+                    class="comment-counter"
+                    [class.over-limit]="(msg.comment?.length || 0) > 500"
+                  >
+                    {{ msg.comment?.length || 0 }}/500
+                  </span>
+                  @if ((msg.comment?.length || 0) > 500) {
+                    <span class="feedback-error">Commentaire trop long (max 500 caractères).</span>
+                  }
+                  <button
+                    class="btn-submit-feedback"
+                    [disabled]="msg.submitting || (msg.comment?.length || 0) > 500"
+                    (click)="submitWithComment($index)"
+                  >
+                    Envoyer
+                  </button>
+                </div>
+              </div>
+            }
           </div>
         }
       </div>

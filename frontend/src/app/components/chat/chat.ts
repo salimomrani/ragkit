@@ -29,6 +29,8 @@ interface Message {
   isPositive?: boolean | null;
   submitting?: boolean;
   feedbackError?: string | null;
+  comment?: string;
+  showComment?: boolean;
 }
 
 @Component({
@@ -173,9 +175,20 @@ export class Chat {
     const msg = msgs[msgIndex];
     if (!msg || !msg.logId || msg.submitting) return;
 
+    if (!isPositive) {
+      this.messages.update((m) =>
+        m.map((item, i) =>
+          i === msgIndex ? { ...item, showComment: true, isPositive: false } : item,
+        ),
+      );
+      return;
+    }
+
     this.messages.update((m) =>
       m.map((item, i) =>
-        i === msgIndex ? { ...item, submitting: true, feedbackError: null } : item,
+        i === msgIndex
+          ? { ...item, submitting: true, feedbackError: null, showComment: false, comment: '' }
+          : item,
       ),
     );
 
@@ -200,6 +213,50 @@ export class Chat {
           );
         },
       });
+  }
+
+  submitWithComment(msgIndex: number): void {
+    const msgs = this.messages();
+    const msg = msgs[msgIndex];
+    if (!msg || !msg.logId || msg.submitting) return;
+
+    const comment = msg.comment?.trim() ? msg.comment.trim() : undefined;
+
+    this.messages.update((m) =>
+      m.map((item, i) =>
+        i === msgIndex ? { ...item, submitting: true, feedbackError: null } : item,
+      ),
+    );
+
+    this.api
+      .submitFeedback(msg.logId, false, comment)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (_entry: FeedbackEntry) => {
+          this.messages.update((m) =>
+            m.map((item, i) =>
+              i === msgIndex
+                ? { ...item, isPositive: false, submitting: false, showComment: false }
+                : item,
+            ),
+          );
+        },
+        error: () => {
+          this.messages.update((m) =>
+            m.map((item, i) =>
+              i === msgIndex
+                ? { ...item, submitting: false, feedbackError: "Erreur lors de l'envoi." }
+                : item,
+            ),
+          );
+        },
+      });
+  }
+
+  updateComment(msgIndex: number, value: string): void {
+    this.messages.update((m) =>
+      m.map((item, i) => (i === msgIndex ? { ...item, comment: value } : item)),
+    );
   }
 
   selectSuggestion(q: string): void {

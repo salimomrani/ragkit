@@ -298,4 +298,113 @@ describe('Chat', () => {
     expect(component.messages()[0].feedbackError).toBeTruthy();
     expect(component.messages()[0].submitting).toBe(false);
   });
+
+  // T013 — US2: Comment textarea interaction tests
+  it('should show textarea when thumbs-down is clicked (showComment becomes true)', () => {
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+        showComment: false,
+        comment: '',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitRating(0, false);
+    fixture.detectChanges();
+
+    expect(component.messages()[0].showComment).toBe(true);
+    expect(mockApi.submitFeedback).not.toHaveBeenCalled();
+  });
+
+  it('should hide textarea when thumbs-up is clicked (showComment becomes false)', () => {
+    mockApi.submitFeedback.mockReturnValue(
+      of({ is_positive: true, comment: null, updated_at: '2026-01-01T00:00:00Z' }),
+    );
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+        showComment: true,
+        comment: 'some text',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitRating(0, true);
+    fixture.detectChanges();
+
+    expect(component.messages()[0].showComment).toBe(false);
+    expect(component.messages()[0].comment).toBe('');
+  });
+
+  it('should call submitFeedback with logId, false, and comment when submitWithComment is called', () => {
+    mockApi.submitFeedback.mockReturnValue(
+      of({ is_positive: false, comment: 'test comment', updated_at: '2026-01-01T00:00:00Z' }),
+    );
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+        showComment: true,
+        comment: 'test comment',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitWithComment(0);
+    fixture.detectChanges();
+
+    expect(mockApi.submitFeedback).toHaveBeenCalledWith('log-abc', false, 'test comment');
+    expect(component.messages()[0].showComment).toBe(false);
+  });
+
+  it('should call submitFeedback with undefined comment when comment is empty string', () => {
+    mockApi.submitFeedback.mockReturnValue(
+      of({ is_positive: false, comment: null, updated_at: '2026-01-01T00:00:00Z' }),
+    );
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+        showComment: true,
+        comment: '',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitWithComment(0);
+    fixture.detectChanges();
+
+    expect(mockApi.submitFeedback).toHaveBeenCalledWith('log-abc', false, undefined);
+  });
 });
