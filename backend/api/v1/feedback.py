@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session as DBSession
 
 from dependencies import get_engine
@@ -15,16 +15,20 @@ class FeedbackRequest(BaseModel):
     is_positive: bool
     comment: str | None = None
 
+    @field_validator('comment')
+    @classmethod
+    def comment_max_length(cls, v):
+        if v is not None and len(v) > 500:
+            raise ValueError('Comment must not exceed 500 characters')
+        return v
+
 
 @router.post("/feedback")
 def post_feedback(body: FeedbackRequest, engine=Depends(get_engine)):
-    if body.comment is not None and len(body.comment) > 500:
-        raise HTTPException(status_code=422, detail="comment must be 500 characters or fewer")
-
     with DBSession(engine) as session:
         log = session.query(QueryLog).filter(QueryLog.id == body.log_id).first()
         if log is None:
-            raise HTTPException(status_code=404, detail="log_id not found")
+            raise HTTPException(status_code=404, detail="Query log not found")
 
         existing = session.query(ResponseFeedback).filter(ResponseFeedback.log_id == body.log_id).first()
         if existing:
