@@ -44,3 +44,10 @@ Read `.specify/memory/constitution.md` before any architectural decision.
 
 - **Code > plan.md > tasks.md** — code wins on divergence
 - Deviations from spec → document in `DECISIONS.md`
+
+## Active Technologies
+- Python 3.12 (backend), TypeScript / Angular (frontend) + FastAPI, SQLAlchemy, PostgreSQL (backend) · Angular 17+, RxJS, Signals (frontend) (011-response-feedback)
+- PostgreSQL 16 (port 5444) — new `response_feedback` table (011-response-feedback)
+
+## Recent Changes
+- 011-response-feedback: Added Python 3.12 (backend), TypeScript / Angular (frontend) + FastAPI, SQLAlchemy, PostgreSQL (backend) · Angular 17+, RxJS, Signals (frontend)

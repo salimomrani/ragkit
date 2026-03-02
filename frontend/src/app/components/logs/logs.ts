@@ -17,6 +17,7 @@ export class Logs implements OnInit {
   isLoading = signal(true);
   error = signal<string | null>(null);
   expandedId = signal<string | null>(null);
+  expandedFeedbackId = signal<string | null>(null);
 
   ngOnInit(): void {
     this.fetchLogs();
@@ -39,6 +40,10 @@ export class Logs implements OnInit {
 
   toggleRow(id: string): void {
     this.expandedId.set(this.expandedId() === id ? null : id);
+  }
+
+  toggleFeedback(id: string): void {
+    this.expandedFeedbackId.set(this.expandedFeedbackId() === id ? null : id);
   }
 
   reasonLabel(reason: string | null): string {

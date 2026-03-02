@@ -40,6 +40,66 @@
             Confiance faible : {{ msg.confidence! * 100 | number: '1.0-0' }}%
           </div>
         }
+
+        @if (msg.role === 'assistant' && msg.streaming === false && msg.feedbackEnabled !== false) {
+          <div class="feedback">
+            <div class="feedback-actions">
+              <span class="feedback-label">Utile ?</span>
+              <button
+                class="feedback-btn"
+                [class.active-positive]="msg.isPositive === true"
+                [class.error]="msg.feedbackError"
+                [disabled]="msg.submitting"
+                (click)="submitRating($index, true)"
+                title="Utile"
+              >
+                👍
+              </button>
+              <button
+                class="feedback-btn"
+                [class.active-negative]="msg.isPositive === false"
+                [class.error]="msg.feedbackError"
+                [disabled]="msg.submitting"
+                (click)="submitRating($index, false)"
+                title="Pas utile"
+              >
+                👎
+              </button>
+              @if (msg.feedbackError) {
+                <span class="feedback-error">{{ msg.feedbackError }}</span>
+              }
+            </div>
+            @if (msg.showComment) {
+              <div class="feedback-comment">
+                <textarea
+                  class="comment-textarea"
+                  [ngModel]="msg.comment"
+                  (ngModelChange)="updateComment($index, $event)"
+                  placeholder="Commentaire optionnel…"
+                  rows="3"
+                ></textarea>
+                <div class="comment-footer">
+                  <span
+                    class="comment-counter"
+                    [class.over-limit]="(msg.comment?.length || 0) > 500"
+                  >
+                    {{ msg.comment?.length || 0 }}/500
+                  </span>
+                  @if ((msg.comment?.length || 0) > 500) {
+                    <span class="feedback-error">Commentaire trop long (max 500 caractères).</span>
+                  }
+                  <button
+                    class="btn-submit-feedback"
+                    [disabled]="msg.submitting || (msg.comment?.length || 0) > 500"
+                    (click)="submitWithComment($index)"
+                  >
+                    Envoyer
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
       </div>
     }
 

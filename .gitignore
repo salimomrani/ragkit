@@ -33,3 +33,4 @@ Thumbs.db
 
 # Debrief prep (local only)
 debrief/
+.worktrees/

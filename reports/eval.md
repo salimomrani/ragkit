@@ -1,6 +1,6 @@
 # PALO RAG — Quality Evaluation Report
 
-**Generated**: 2026-03-01 02:16:06
+**Generated**: 2026-03-02 00:55:08
 **Dataset**: 15 reference questions
 
 ## Summary

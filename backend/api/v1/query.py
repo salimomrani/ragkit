@@ -111,7 +111,7 @@ def query_stream(
             except Exception:
                 pass
         if meta and done:
-            log_store.save(
+            log = log_store.save(
                 question=request.question,
                 retrieved_sources=[s["source"] for s in meta.get("sources", [])],
                 similarity_scores=[s["score"] for s in meta.get("sources", [])],
@@ -121,6 +121,7 @@ def query_stream(
                 guardrail_triggered=None,
                 session_id=request.session_id,
             )
+            yield f"data: {json.dumps({'type': 'log', 'log_id': log.id})}\n\n"
 
     #    Return a streaming response with appropriate headers for SSE
     return StreamingResponse(

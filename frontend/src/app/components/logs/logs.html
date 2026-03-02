@@ -31,6 +31,7 @@
             <th>Réponse</th>
             <th>Confiance</th>
             <th>Statut</th>
+            <th>Feedback</th>
           </tr>
         </thead>
         <tbody>
@@ -69,6 +70,31 @@
                   <span class="tag rejected">Rejeté</span>
                 } @else {
                   <span class="tag ok">OK</span>
+                }
+              </td>
+              <td class="cell-feedback">
+                @if (log.feedback) {
+                  @if (log.feedback.comment) {
+                    <span
+                      [class]="log.feedback.is_positive ? 'feedback-positive' : 'feedback-negative'"
+                      role="button"
+                      tabindex="0"
+                      class="feedback-expandable"
+                      (click)="toggleFeedback(log.id); $event.stopPropagation()"
+                      (keyup.enter)="toggleFeedback(log.id)"
+                      >{{ log.feedback.is_positive ? '👍' : '👎' }}</span
+                    >
+                  } @else {
+                    <span
+                      [class]="log.feedback.is_positive ? 'feedback-positive' : 'feedback-negative'"
+                      >{{ log.feedback.is_positive ? '👍' : '👎' }}</span
+                    >
+                  }
+                  @if (expandedFeedbackId() === log.id && log.feedback.comment) {
+                    <div class="feedback-comment-expanded">{{ log.feedback.comment }}</div>
+                  }
+                } @else {
+                  <span class="feedback-none">—</span>
                 }
               </td>
             </tr>

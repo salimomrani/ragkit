@@ -1,10 +1,11 @@
 import json
 
 from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from core.config import settings
 from dependencies import get_engine
-from logging_service.store import LogStore
+from models.db import QueryLog, ResponseFeedback
 
 router = APIRouter(tags=["logs"])
 
@@ -23,20 +24,41 @@ def _parse_json_list(value, default):
 
 @router.get("/logs")
 def get_logs(limit: int = settings.default_logs_limit, engine=Depends(get_engine)):
-    logs = LogStore(engine=engine).get_recent(limit=limit)
-    return [
-        {
-            "id": log.id,
-            "timestamp": log.timestamp.isoformat(),
-            "question_masked": log.question_masked,
-            "retrieved_sources": _parse_json_list(getattr(log, "retrieved_sources", None), []),
-            "similarity_scores": _parse_json_list(log.similarity_scores, []),
-            "answer": log.answer,
-            "faithfulness_score": log.faithfulness_score,
-            "latency_ms": log.latency_ms,
-            "guardrail_triggered": log.guardrail_triggered,
-            "rejected": log.guardrail_triggered is not None,
-            "rejection_reason": log.guardrail_triggered,
-        }
-        for log in logs
-    ]
+    with Session(engine) as session:
+        rows = (
+            session.query(QueryLog, ResponseFeedback)
+            .outerjoin(ResponseFeedback, ResponseFeedback.log_id == QueryLog.id)
+            .order_by(QueryLog.timestamp.desc())
+            .limit(limit)
+            .all()
+        )
+
+    result = []
+    for log, feedback in rows:
+        feedback_data = None
+        if feedback is not None:
+            feedback_data = {
+                "id": feedback.id,
+                "log_id": feedback.log_id,
+                "is_positive": feedback.is_positive,
+                "comment": feedback.comment,
+                "created_at": feedback.created_at.isoformat(),
+                "updated_at": feedback.updated_at.isoformat(),
+            }
+        result.append(
+            {
+                "id": log.id,
+                "timestamp": log.timestamp.isoformat(),
+                "question_masked": log.question_masked,
+                "retrieved_sources": _parse_json_list(getattr(log, "retrieved_sources", None), []),
+                "similarity_scores": _parse_json_list(log.similarity_scores, []),
+                "answer": log.answer,
+                "faithfulness_score": log.faithfulness_score,
+                "latency_ms": log.latency_ms,
+                "guardrail_triggered": log.guardrail_triggered,
+                "rejected": log.guardrail_triggered is not None,
+                "rejection_reason": log.guardrail_triggered,
+                "feedback": feedback_data,
+            }
+        )
+    return result

@@ -469,6 +469,90 @@ def test_delete_conversation_not_found(client):
     assert r.status_code == 404
 
 
+# T005 — US1: POST /api/v1/feedback tests
+def _create_log_entry(client) -> str:
+    """Helper: trigger a query to create a QueryLog row; return the log id."""
+    r = client.post("/api/v1/query", json={"question": "Comment configurer Slack ?"})
+    assert r.status_code == 200
+    # Retrieve the log entry to get its id
+    logs = client.get("/api/v1/logs").json()
+    assert len(logs) > 0
+    return logs[0]["id"]
+
+
+def test_feedback_create_positive(client):
+    log_id = _create_log_entry(client)
+    r = client.post("/api/v1/feedback", json={"log_id": log_id, "is_positive": True, "comment": None})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["log_id"] == log_id
+    assert body["is_positive"] is True
+    assert body["comment"] is None
+    assert "id" in body
+    assert "created_at" in body
+    assert "updated_at" in body
+
+
+def test_feedback_upsert_updates_rating(client):
+    log_id = _create_log_entry(client)
+    # First submission — positive
+    r1 = client.post("/api/v1/feedback", json={"log_id": log_id, "is_positive": True, "comment": None})
+    assert r1.status_code == 200
+    assert r1.json()["is_positive"] is True
+
+    # Second submission — negative for the same log_id
+    r2 = client.post("/api/v1/feedback", json={"log_id": log_id, "is_positive": False, "comment": None})
+    assert r2.status_code == 200
+    body2 = r2.json()
+    assert body2["is_positive"] is False
+    # Same record (same id), not a new one
+    assert body2["id"] == r1.json()["id"]
+
+
+def test_feedback_404_for_unknown_log_id(client):
+    r = client.post("/api/v1/feedback", json={"log_id": "nonexistent-uuid", "is_positive": True, "comment": None})
+    assert r.status_code == 404
+    assert r.json()["detail"] == "Query log not found"
+
+
+def test_feedback_422_comment_too_long(client):
+    log_id = _create_log_entry(client)
+    long_comment = "a" * 501
+    r = client.post("/api/v1/feedback", json={"log_id": log_id, "is_positive": True, "comment": long_comment})
+    assert r.status_code == 422
+    assert any("Comment must not exceed 500 characters" in e["msg"] for e in r.json()["detail"])
+
+
+# T015 — US3: GET /logs includes feedback field
+def test_get_logs_entry_without_feedback_has_null_feedback(client):
+    client.post("/api/v1/query", json={"question": "Test log feedback null ?"})
+    r = client.get("/api/v1/logs")
+    assert r.status_code == 200
+    logs = r.json()
+    assert len(logs) > 0
+    assert logs[0]["feedback"] is None
+
+
+def test_get_logs_entry_with_feedback_has_correct_fields(client):
+    log_id = _create_log_entry(client)
+    r_fb = client.post(
+        "/api/v1/feedback",
+        json={"log_id": log_id, "is_positive": True, "comment": "Great answer"},
+    )
+    assert r_fb.status_code == 200
+
+    r = client.get("/api/v1/logs")
+    assert r.status_code == 200
+    logs = r.json()
+    target = next((entry for entry in logs if entry["id"] == log_id), None)
+    assert target is not None
+    fb = target["feedback"]
+    assert fb is not None
+    assert fb["is_positive"] is True
+    assert fb["comment"] == "Great answer"
+    assert "updated_at" in fb
+
+
 # T025 — US2: Most recent session appears first
 def test_get_history_ordered_most_recent_first(client):
     import time

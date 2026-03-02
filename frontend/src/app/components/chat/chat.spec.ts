@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NEVER } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { provideMarkdown } from 'ngx-markdown';
 
@@ -10,11 +10,12 @@ import { ConversationService } from '../../services/conversation.service';
 describe('Chat', () => {
   let component: Chat;
   let fixture: ComponentFixture<Chat>;
-  let mockApi: { streamQuery: ReturnType<typeof vi.fn> };
+  let mockApi: { streamQuery: ReturnType<typeof vi.fn>; submitFeedback: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     mockApi = {
       streamQuery: vi.fn().mockReturnValue(NEVER),
+      submitFeedback: vi.fn().mockReturnValue(NEVER),
     };
 
     await TestBed.configureTestingModule({
@@ -162,5 +163,274 @@ describe('Chat', () => {
     subject$.complete();
 
     expect(convService.loadHistory).toHaveBeenCalled();
+  });
+
+  // T010 — US1: Feedback button tests
+  it('should NOT show feedback buttons while message is streaming', () => {
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'partial...',
+        streaming: true,
+        logId: 'log-1',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+      },
+    ]);
+    fixture.detectChanges();
+    const buttons = fixture.nativeElement.querySelectorAll('.feedback-btn');
+    expect(buttons.length).toBe(0);
+  });
+
+  it('should show feedback buttons after streaming completes with feedbackEnabled = true', () => {
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Full answer.',
+        streaming: false,
+        logId: 'log-1',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+      },
+    ]);
+    fixture.detectChanges();
+    const buttons = fixture.nativeElement.querySelectorAll('.feedback-btn');
+    expect(buttons.length).toBe(2);
+  });
+
+  it('should NOT show feedback buttons when feedbackEnabled is false', () => {
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Blocked.',
+        streaming: false,
+        logId: null,
+        feedbackEnabled: false,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+      },
+    ]);
+    fixture.detectChanges();
+    const buttons = fixture.nativeElement.querySelectorAll('.feedback-btn');
+    expect(buttons.length).toBe(0);
+  });
+
+  it('should call submitFeedback with correct args when thumbs-up is clicked', () => {
+    mockApi.submitFeedback.mockReturnValue(
+      of({ is_positive: true, comment: null, updated_at: '2026-01-01T00:00:00Z' }),
+    );
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+      },
+    ]);
+    fixture.detectChanges();
+
+    const thumbsUp = fixture.nativeElement.querySelector('.feedback-btn[title="Utile"]');
+    thumbsUp.click();
+    fixture.detectChanges();
+
+    expect(mockApi.submitFeedback).toHaveBeenCalledWith('log-abc', true);
+  });
+
+  it('should set isPositive = true on message after successful positive rating', () => {
+    mockApi.submitFeedback.mockReturnValue(
+      of({ is_positive: true, comment: null, updated_at: '2026-01-01T00:00:00Z' }),
+    );
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitRating(0, true);
+    fixture.detectChanges();
+
+    expect(component.messages()[0].isPositive).toBe(true);
+    expect(component.messages()[0].submitting).toBe(false);
+  });
+
+  it('should set feedbackError when submitFeedback fails', () => {
+    mockApi.submitFeedback.mockReturnValue(throwError(() => new Error('network error')));
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitRating(0, true);
+    fixture.detectChanges();
+
+    expect(component.messages()[0].feedbackError).toBeTruthy();
+    expect(component.messages()[0].submitting).toBe(false);
+  });
+
+  // T013 — US2: Comment textarea interaction tests
+  it('should show textarea when thumbs-down is clicked (showComment becomes true)', () => {
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+        showComment: false,
+        comment: '',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitRating(0, false);
+    fixture.detectChanges();
+
+    expect(component.messages()[0].showComment).toBe(true);
+    expect(mockApi.submitFeedback).not.toHaveBeenCalled();
+  });
+
+  it('should hide textarea when thumbs-up is clicked (showComment becomes false)', () => {
+    mockApi.submitFeedback.mockReturnValue(
+      of({ is_positive: true, comment: null, updated_at: '2026-01-01T00:00:00Z' }),
+    );
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+        showComment: true,
+        comment: 'some text',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitRating(0, true);
+    fixture.detectChanges();
+
+    expect(component.messages()[0].showComment).toBe(false);
+    expect(component.messages()[0].comment).toBe('');
+  });
+
+  it('should call submitFeedback with logId, false, and comment when submitWithComment is called', () => {
+    mockApi.submitFeedback.mockReturnValue(
+      of({ is_positive: false, comment: 'test comment', updated_at: '2026-01-01T00:00:00Z' }),
+    );
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+        showComment: true,
+        comment: 'test comment',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitWithComment(0);
+    fixture.detectChanges();
+
+    expect(mockApi.submitFeedback).toHaveBeenCalledWith('log-abc', false, 'test comment');
+    expect(component.messages()[0].showComment).toBe(false);
+  });
+
+  it('should call submitFeedback with undefined comment when comment is empty string', () => {
+    mockApi.submitFeedback.mockReturnValue(
+      of({ is_positive: false, comment: null, updated_at: '2026-01-01T00:00:00Z' }),
+    );
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+        showComment: true,
+        comment: '',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitWithComment(0);
+    fixture.detectChanges();
+
+    expect(mockApi.submitFeedback).toHaveBeenCalledWith('log-abc', false, undefined);
+  });
+
+  it('should set feedbackError and clear submitting when submitWithComment fails', () => {
+    mockApi.submitFeedback.mockReturnValue(throwError(() => new Error('network error')));
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Answer.',
+        streaming: false,
+        logId: 'log-abc',
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+        showComment: true,
+        comment: 'some comment',
+      },
+    ]);
+    fixture.detectChanges();
+
+    component.submitWithComment(0);
+    fixture.detectChanges();
+
+    expect(component.messages()[0].feedbackError).toBeTruthy();
+    expect(component.messages()[0].submitting).toBe(false);
   });
 });

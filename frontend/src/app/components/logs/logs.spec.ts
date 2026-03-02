@@ -18,6 +18,14 @@ const mockLogs: LogEntry[] = [
     guardrail_triggered: null,
     rejected: false,
     rejection_reason: null,
+    feedback: {
+      id: 'f1',
+      log_id: '1',
+      is_positive: true,
+      comment: 'Excellent!',
+      created_at: '2024-01-01T10:01:00Z',
+      updated_at: '2024-01-01T10:01:00Z',
+    },
   },
   {
     id: '2',
@@ -31,6 +39,28 @@ const mockLogs: LogEntry[] = [
     guardrail_triggered: 'guardrail:prompt_injection',
     rejected: true,
     rejection_reason: 'guardrail:prompt_injection',
+    feedback: {
+      id: 'f2',
+      log_id: '2',
+      is_positive: false,
+      comment: null,
+      created_at: '2024-01-02T11:01:00Z',
+      updated_at: '2024-01-02T11:01:00Z',
+    },
+  },
+  {
+    id: '3',
+    timestamp: '2024-01-03T12:00:00Z',
+    question_masked: 'Q***tion sans feedback ?',
+    retrieved_sources: [],
+    similarity_scores: [],
+    answer: 'Réponse.',
+    faithfulness_score: 0.7,
+    latency_ms: 200,
+    guardrail_triggered: null,
+    rejected: false,
+    rejection_reason: null,
+    feedback: null,
   },
 ];
 
@@ -59,7 +89,7 @@ describe('Logs', () => {
 
   it('should load logs on init', () => {
     expect(mockApi.getLogs).toHaveBeenCalled();
-    expect(component.logs().length).toBe(2);
+    expect(component.logs().length).toBe(3);
     expect(component.isLoading()).toBe(false);
   });
 
@@ -102,5 +132,53 @@ describe('Logs', () => {
     await fixture.whenStable();
     expect(component.error()).toBe("Impossible de charger l'historique.");
     expect(component.isLoading()).toBe(false);
+  });
+
+  // T019 — US3: Feedback column in logs table
+  it('renders thumbs-up for positive feedback', () => {
+    const compiled: HTMLElement = fixture.nativeElement;
+    const cells = compiled.querySelectorAll('td');
+    const feedbackCells = Array.from(cells).filter(
+      (td) =>
+        td.textContent?.includes('👍') ||
+        td.textContent?.includes('👎') ||
+        td.textContent?.includes('—'),
+    );
+    const thumbsUp = feedbackCells.some((td) => td.textContent?.includes('👍'));
+    expect(thumbsUp).toBe(true);
+  });
+
+  it('renders thumbs-down for negative feedback', () => {
+    const compiled: HTMLElement = fixture.nativeElement;
+    const cells = compiled.querySelectorAll('td');
+    const thumbsDown = Array.from(cells).some((td) => td.textContent?.includes('👎'));
+    expect(thumbsDown).toBe(true);
+  });
+
+  it('renders em-dash for null feedback', () => {
+    const compiled: HTMLElement = fixture.nativeElement;
+    const cells = compiled.querySelectorAll('td');
+    const emDash = Array.from(cells).some((td) => td.querySelector('.feedback-none') !== null);
+    expect(emDash).toBe(true);
+  });
+
+  it('toggleFeedback expands comment', () => {
+    expect(component.expandedFeedbackId()).toBeNull();
+    component.toggleFeedback('1');
+    expect(component.expandedFeedbackId()).toBe('1');
+  });
+
+  it('toggleFeedback collapses when toggled again', () => {
+    component.toggleFeedback('1');
+    component.toggleFeedback('1');
+    expect(component.expandedFeedbackId()).toBeNull();
+  });
+
+  it('comment is visible after toggleFeedback', () => {
+    component.toggleFeedback('1');
+    fixture.detectChanges();
+    const compiled: HTMLElement = fixture.nativeElement;
+    const expanded = compiled.querySelector('.feedback-comment-expanded');
+    expect(expanded?.textContent).toContain('Excellent!');
   });
 });
