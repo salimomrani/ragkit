@@ -115,25 +115,75 @@
   </div>
 
   <div class="input-area">
-    <button class="btn-history" (click)="conversationService.toggleHistory()" title="Historique">
-      Historique
-    </button>
-    <textarea
-      #promptInput
-      [value]="prompt()"
-      (input)="prompt.set(promptInput.value)"
-      (keydown)="onKeydown($event)"
-      placeholder="Posez une question… (Entrée pour envoyer, Maj+Entrée pour un saut de ligne)"
-      [disabled]="isLoading()"
-      rows="2"
-    >
-    </textarea>
-    <button (click)="sendMessage()" [disabled]="!canSend()">Envoyer</button>
-    @if (messages().length > 0 && !isLoading()) {
-      <button class="btn-clear" (click)="clearConversation()" title="Effacer la conversation">
-        Effacer
-      </button>
-    }
+    <div class="composer">
+      <textarea
+        #promptInput
+        [value]="prompt()"
+        (input)="prompt.set(promptInput.value)"
+        (keydown)="onKeydown($event)"
+        placeholder="Posez votre question… (Maj+Entrée pour un saut de ligne)"
+        [disabled]="isLoading()"
+        rows="1"
+      ></textarea>
+      <div class="composer-bar">
+        <div class="composer-secondary">
+          <button
+            class="btn-ghost"
+            (click)="conversationService.toggleHistory()"
+            title="Historique"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 15 15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="7.5" cy="7.5" r="5.5" />
+              <polyline points="7.5,4.5 7.5,7.5 9.5,9" />
+            </svg>
+          </button>
+          @if (messages().length > 0 && !isLoading()) {
+            <button class="btn-ghost" (click)="clearConversation()" title="Nouvelle conversation">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 15 15"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M1.5 7.5a6 6 0 1 0 1.2-3.6" />
+                <polyline points="1.5,1.5 1.5,5.5 5.5,5.5" />
+              </svg>
+            </button>
+          }
+        </div>
+        <div class="composer-primary">
+          <span class="send-hint">⏎ envoyer</span>
+          <button class="btn-send" (click)="sendMessage()" [disabled]="!canSend()">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 15 15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="7.5" y1="12" x2="7.5" y2="3" />
+              <polyline points="4,6 7.5,3 11,6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <app-history-panel></app-history-panel>
