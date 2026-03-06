@@ -11,11 +11,13 @@ import {
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { RagApiService, Document } from '../../services/rag-api.service';
+import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
+import { AlertComponent } from '../../shared/components/alert';
 
 @Component({
   selector: 'app-ingest',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RelativeDatePipe, AlertComponent],
   templateUrl: './ingest.html',
   styleUrls: ['./ingest.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -216,37 +218,5 @@ export class Ingest implements OnInit {
 
   closeDocumentView(): void {
     this.viewingDocument.set(null);
-  }
-
-  formatDate(isoString: string): string {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / 86_400_000);
-
-    const formatted = date.toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-
-    let relative: string;
-    if (diffMs < 60_000) {
-      relative = "à l'instant";
-    } else if (diffMs < 3_600_000) {
-      const mins = Math.floor(diffMs / 60_000);
-      relative = `il y a ${mins} min`;
-    } else if (diffDays === 0) {
-      const hrs = Math.floor(diffMs / 3_600_000);
-      relative = `il y a ${hrs} h`;
-    } else if (diffDays === 1) {
-      relative = 'hier';
-    } else if (diffDays < 30) {
-      relative = `il y a ${diffDays} j`;
-    } else {
-      relative = '';
-    }
-
-    return relative ? `${formatted} · ${relative}` : formatted;
   }
 }

@@ -11,10 +11,7 @@
 
   @if (!conversationService.selectedConversation()) {
     @if (conversationService.conversations().length === 0) {
-      <div class="history-empty">
-        <span class="empty-icon">◫</span>
-        <p>aucune conversation<br />sauvegardée.</p>
-      </div>
+      <app-empty-state icon="◫" message="aucune conversation sauvegardée." />
     } @else {
       <ul class="conversation-list">
         @for (conv of conversationService.conversations(); track conv.session_id) {

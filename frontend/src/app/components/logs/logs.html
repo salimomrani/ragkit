@@ -10,15 +10,10 @@
     </button>
   </div>
 
-  @if (error()) {
-    <div class="alert error">{{ error() }}</div>
-  }
+  <app-alert [message]="error()" type="error" />
 
   @if (!isLoading() && logs().length === 0 && !error()) {
-    <div class="empty-state">
-      <span class="empty-icon">◎</span>
-      <p>Aucune requête enregistrée.</p>
-    </div>
+    <app-empty-state icon="◎" message="Aucune requête enregistrée." />
   }
 
   @if (!isLoading() && logs().length > 0) {
@@ -59,7 +54,7 @@
               <td class="cell-score">
                 @if (!log.rejected) {
                   <span class="badge" [class.low]="log.faithfulness_score < 0.6">
-                    {{ log.faithfulness_score * 100 | number: '1.0-0' }}%
+                    {{ log.faithfulness_score | toPercent }}
                   </span>
                 } @else {
                   <span class="badge rejected">—</span>

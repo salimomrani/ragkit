@@ -12,17 +12,17 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
 import { MarkdownComponent } from 'ngx-markdown';
 import { HistoryEntry, RagApiService, FeedbackEntry } from '../../services/rag-api.service';
 import { ConversationService } from '../../services/conversation.service';
 import { HistoryPanel } from './history-panel/history-panel';
 import { Message } from '../../models/message';
+import { ToPercentPipe } from '../../shared/pipes/percent.pipe';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [FormsModule, DecimalPipe, MarkdownComponent, HistoryPanel],
+  imports: [FormsModule, MarkdownComponent, HistoryPanel, ToPercentPipe],
   templateUrl: './chat.html',
   styleUrls: ['./chat.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

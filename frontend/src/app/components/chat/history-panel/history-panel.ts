@@ -1,11 +1,12 @@
 import { Component, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ConversationService } from '../../../services/conversation.service';
+import { EmptyStateComponent } from '../../../shared/components/empty-state';
 
 @Component({
   selector: 'app-history-panel',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, EmptyStateComponent],
   templateUrl: './history-panel.html',
   styleUrls: ['./history-panel.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

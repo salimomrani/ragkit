@@ -20,7 +20,9 @@ describe('Ingest', () => {
       getDocuments: vi.fn().mockReturnValue(of(mockDocs)),
       ingest: vi.fn().mockReturnValue(of({ chunk_count: 3 })),
       deleteDocument: vi.fn().mockReturnValue(of(null)),
-      getDocumentContent: vi.fn().mockReturnValue(of({ id: 'a', content: 'Mock chunk content here.' })),
+      getDocumentContent: vi
+        .fn()
+        .mockReturnValue(of({ id: 'a', content: 'Mock chunk content here.' })),
     };
 
     await TestBed.configureTestingModule({
@@ -106,26 +108,6 @@ describe('Ingest', () => {
 
   it('stats.totalChunks is the sum of all chunk_counts', () => {
     expect(component.stats().totalChunks).toBe(10); // 3 + 5 + 2
-  });
-
-  // --- New: formatDate ---
-
-  it('formatDate returns a non-empty string for a valid ISO date', () => {
-    const result = component.formatDate('2024-01-01T00:00:00Z');
-    expect(typeof result).toBe('string');
-    expect(result.length).toBeGreaterThan(0);
-  });
-
-  it('formatDate includes relative time for recent dates', () => {
-    const recent = new Date(Date.now() - 2 * 86_400_000).toISOString(); // 2 days ago
-    const result = component.formatDate(recent);
-    expect(result).toContain('il y a');
-  });
-
-  it("formatDate includes \"à l'instant\" for very recent dates", () => {
-    const justNow = new Date(Date.now() - 5000).toISOString(); // 5 seconds ago
-    const result = component.formatDate(justNow);
-    expect(result).toContain("à l'instant");
   });
 
   // --- New: Document Viewer (T004) ---

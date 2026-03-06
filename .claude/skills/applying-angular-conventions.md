@@ -10,7 +10,7 @@ description: Applies Angular 17+ conventions when writing or modifying TypeScrip
   selector: 'app-user-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [DatePipe],   // import only what you need — no CommonModule
   template: `...`,
 })
 export class UserListComponent {
@@ -32,10 +32,15 @@ No NgModules, no constructor injection, no `@Input()`/`@Output()`/`@ViewChild()`
 
 - **`viewChild()` signal** over `@ViewChild` decorator: `messagesEl = viewChild<ElementRef<HTMLElement>>('messagesEl');`
 - **Never use `document.getElementById`** — use `viewChild()` signal instead
-- **Never use `setTimeout` for post-render DOM access** — use `afterNextRender()` instead
+- **Never use `setTimeout` for post-render DOM access** — use `afterNextRender()` instead. `afterNextRender()` requires an injection context: if called outside the constructor, inject `Injector` and pass `{ injector: this.injector }` as the second argument
 - **Derived state must use `computed()`** — never call methods in templates for derived values (recalculated every CD cycle)
 - **Interfaces/models** — extract shared interfaces into dedicated files (`models/` or next to the service), not inside components
 - **`$event.stopPropagation()` and event logic** — always handle in component methods, never inline in templates
+- **CSS class binding** — use `[class]="dynamicClass"` for the variant only; never concatenate with a static prefix like `[class]="'alert ' + type()"`. Instead use both `class="alert"` and `[class]="type()"` as separate bindings, or use `[ngClass]`
+- **Extract reusable components** — if a template pattern appears 2+ times across files, extract it into a standalone component
+- **Create custom pipes** for repeated template transformations (date formatting, label mapping, truncation, etc.) instead of calling methods in templates
+- **Create custom directives** for repeated DOM behavior (auto-focus, click-outside, tooltip, etc.) instead of duplicating logic across components
+- **Before creating a new pipe/directive/component** — always check if an existing one can be reused or extended. Prefer adapting an existing abstraction over creating a new one, but never break existing consumers when extending
 
 ## Template syntax
 

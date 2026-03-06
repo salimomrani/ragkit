@@ -43,12 +43,8 @@
       }
     </button>
 
-    @if (successMsg()) {
-      <div class="alert success">{{ successMsg() }}</div>
-    }
-    @if (error()) {
-      <div class="alert error">{{ error() }}</div>
-    }
+    <app-alert [message]="successMsg()" type="success" />
+    <app-alert [message]="error()" type="error" />
   </section>
 
   <section class="doc-list">
@@ -125,7 +121,7 @@
                 </td>
                 <td class="doc-name">{{ doc.name }}</td>
                 <td class="doc-meta">{{ doc.chunk_count }} chunks</td>
-                <td class="doc-date">{{ formatDate(doc.ingested_at) }}</td>
+                <td class="doc-date">{{ doc.ingested_at | relativeDate }}</td>
                 <td class="td-actions">
                   <button class="btn-icon" (click)="viewDocument(doc)" title="Voir le contenu">
                     👁

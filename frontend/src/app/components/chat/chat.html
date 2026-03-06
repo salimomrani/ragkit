@@ -36,9 +36,7 @@
         }
 
         @if (msg.lowConfidence) {
-          <div class="confidence low">
-            Confiance faible : {{ msg.confidence! * 100 | number: '1.0-0' }}%
-          </div>
+          <div class="confidence low">Confiance faible : {{ msg.confidence | toPercent }}</div>
         }
 
         @if (msg.role === 'assistant' && msg.streaming === false && msg.feedbackEnabled !== false) {

@@ -6,13 +6,16 @@ import {
   OnInit,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { RagApiService, EvalReport } from '../../services/rag-api.service';
+import { ToPercentPipe } from '../../shared/pipes/percent.pipe';
+import { AlertComponent } from '../../shared/components/alert';
+import { EmptyStateComponent } from '../../shared/components/empty-state';
 
 @Component({
   selector: 'app-eval',
   standalone: true,
-  imports: [DatePipe, DecimalPipe],
+  imports: [DatePipe, ToPercentPipe, AlertComponent, EmptyStateComponent],
   templateUrl: './eval.html',
   styleUrls: ['./eval.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

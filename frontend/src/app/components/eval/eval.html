@@ -15,19 +15,11 @@
     </div>
   </div>
 
-  @if (error()) {
-    <div class="alert error">{{ error() }}</div>
-  }
-
-  @if (info()) {
-    <div class="alert info">{{ info() }}</div>
-  }
+  <app-alert [message]="error()" type="error" />
+  <app-alert [message]="info()" type="info" />
 
   @if (isLoading()) {
-    <div class="empty-state">
-      <span class="empty-icon">◎</span>
-      <p>Chargement…</p>
-    </div>
+    <app-empty-state icon="◎" message="Chargement…" />
   }
 
   @if (!isLoading() && report()) {
@@ -39,25 +31,19 @@
     <div class="summary-grid">
       <div class="metric-card" [class.low]="(report()?.faithfulness ?? 0) < 0.6">
         <span class="metric-label">Faithfulness</span>
-        <span class="metric-value"
-          >{{ (report()?.faithfulness ?? 0) * 100 | number: '1.0-0' }}%</span
-        >
+        <span class="metric-value">{{ report()?.faithfulness | toPercent }}</span>
       </div>
       <div class="metric-card" [class.low]="(report()?.answer_relevancy ?? 0) < 0.6">
         <span class="metric-label">Answer Relevancy</span>
-        <span class="metric-value"
-          >{{ (report()?.answer_relevancy ?? 0) * 100 | number: '1.0-0' }}%</span
-        >
+        <span class="metric-value">{{ report()?.answer_relevancy | toPercent }}</span>
       </div>
       <div class="metric-card" [class.low]="(report()?.context_recall ?? 0) < 0.6">
         <span class="metric-label">Context Recall</span>
-        <span class="metric-value"
-          >{{ (report()?.context_recall ?? 0) * 100 | number: '1.0-0' }}%</span
-        >
+        <span class="metric-value">{{ report()?.context_recall | toPercent }}</span>
       </div>
       <div class="metric-card avg" [class.low]="avg() < 0.6">
         <span class="metric-label">Moyenne</span>
-        <span class="metric-value">{{ avg() * 100 | number: '1.0-0' }}%</span>
+        <span class="metric-value">{{ avg() | toPercent }}</span>
       </div>
     </div>
 
