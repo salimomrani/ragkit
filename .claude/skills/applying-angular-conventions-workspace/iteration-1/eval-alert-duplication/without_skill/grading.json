@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "Recommends extracting a standalone reusable AlertComponent",
+      "passed": true,
+      "evidence": "`standalone: true` AlertComponent created with selector `app-alert`"
+    },
+    {
+      "text": "The proposed component uses input() signal for message",
+      "passed": true,
+      "evidence": "Line 37: `message = input<string | null>(null)` and `type = input<\"error\" | \"success\" | \"info\">(\"error\")`"
+    },
+    {
+      "text": "The component encapsulates the @if(message()) — callers don't need the @if",
+      "passed": true,
+      "evidence": "Template line 8: `@if (message()) {` — the guard is inside the component"
+    },
+    {
+      "text": "No duplicate 'alert' CSS class (avoids [class]=\"'alert ' + type()\" anti-pattern)",
+      "passed": false,
+      "evidence": "Line 9: `[class]=\"'alert ' + type()\"` — introduces the duplicate class bug; static `class` attribute is absent here but the pattern is fragile and incorrect"
+    }
+  ]
+}

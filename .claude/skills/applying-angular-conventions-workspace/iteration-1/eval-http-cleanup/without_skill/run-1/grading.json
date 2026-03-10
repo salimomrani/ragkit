@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "Correctly identifies takeUntilDestroyed as unnecessary on HTTP calls (HTTP observables auto-complete)",
+      "passed": false,
+      "evidence": "response.md: \"Passer destroyRef explicitement en argument permet d'utiliser takeUntilDestroyed en dehors du contexte d'injection... Ce n'est pas un bug.\" \u2014 WRONG: validates unnecessary cleanup operator on HTTP"
+    },
+    {
+      "text": "Recommends moving HttpClient call to a service",
+      "passed": false,
+      "evidence": "corrected.ts: `private http = inject(HttpClient)` remains in the component \u2014 no service extraction"
+    },
+    {
+      "text": "Suggests toSignal() or resource() as a better pattern",
+      "passed": true,
+      "evidence": "corrected.ts: `users = toSignal(this.http.get<User[]>('/api/users'), { initialValue: [] })`"
+    },
+    {
+      "text": "Does NOT validate the original code as correct",
+      "passed": true,
+      "evidence": "response.md: \"Verdict: incorrect (bug bloquant)\" \u2014 flags the missing inject(HttpClient)"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 2,
+    "total": 4,
+    "pass_rate": 0.5
+  }
+}

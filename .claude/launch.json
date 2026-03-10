@@ -16,7 +16,7 @@
         "--port",
         "8000",
         "--app-dir",
-        "/Users/salimomrani/code/_Autres/PALO/.claude/worktrees/xenodochial-meninsky/backend"
+        "backend"
       ],
       "port": 8000
     },

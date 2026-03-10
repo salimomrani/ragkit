@@ -1,0 +1,313 @@
+{
+  "metadata": {
+    "skill_name": "applying-angular-conventions",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-03-06T15:15:14Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 28.5,
+        "tokens": 10194,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Recommends extracting a standalone reusable AlertComponent",
+          "passed": true,
+          "evidence": "`standalone: true` AlertComponent created with selector `app-alert`"
+        },
+        {
+          "text": "The proposed component uses input() signal for message",
+          "passed": true,
+          "evidence": "Line 14: `message = input<string | null>(null)` and `type = input<\"error\" | \"success\" | \"info\">(\"error\")`"
+        },
+        {
+          "text": "The component encapsulates the @if(message()) \u2014 callers don't need the @if",
+          "passed": true,
+          "evidence": "Template line 8: `@if (message()) {` \u2014 the guard is inside the component"
+        },
+        {
+          "text": "No duplicate 'alert' CSS class (avoids [class]=\"'alert ' + type()\" anti-pattern)",
+          "passed": true,
+          "evidence": "Line 9: `[class]=\"type()\"` \u2014 uses only type(), no concatenation with 'alert '"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 47.1,
+        "tokens": 14388,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Correctly identifies takeUntilDestroyed as unnecessary on HTTP calls (HTTP observables auto-complete)",
+          "passed": true,
+          "evidence": "response.md: \"HttpClient.get() est un observable fini \u2014 il complete automatiquement... Ajouter takeUntilDestroyed est du bruit inutile\""
+        },
+        {
+          "text": "Recommends moving HttpClient call to a service",
+          "passed": true,
+          "evidence": "corrected.ts: Creates `UserService` with `@Injectable({ providedIn: 'root' })` and moves `http.get` there"
+        },
+        {
+          "text": "Suggests toSignal() or resource() as a better pattern",
+          "passed": true,
+          "evidence": "corrected.ts: Uses `resource({ loader: () => firstValueFrom(this.userService.getAll$()) })`"
+        },
+        {
+          "text": "Does NOT validate the original code as correct",
+          "passed": true,
+          "evidence": "response.md header: \"Verdict : NON conforme aux conventions Angular\""
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 42.9,
+        "tokens": 11114,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Uses viewChild() signal instead of @ViewChild decorator",
+          "passed": true,
+          "evidence": "Line 24: `private cardEl = viewChild<ElementRef<HTMLElement>>(\"cardEl\");`"
+        },
+        {
+          "text": "Uses afterNextRender() instead of setTimeout",
+          "passed": true,
+          "evidence": "Line 27: `afterNextRender(() => { ... })` called in constructor"
+        },
+        {
+          "text": "Uses input() / output() signals instead of @Input / @Output decorators",
+          "passed": true,
+          "evidence": "Lines 19-22: `name = input.required<string>()`, `date = input.required<string>()`, `deleted = output<void>()`"
+        },
+        {
+          "text": "Declares ChangeDetectionStrategy.OnPush",
+          "passed": true,
+          "evidence": "Line 14: `changeDetection: ChangeDetectionStrategy.OnPush`"
+        },
+        {
+          "text": "Standalone: true \u2014 no NgModule",
+          "passed": true,
+          "evidence": "Line 13: `standalone: true`"
+        },
+        {
+          "text": "No setTimeout anywhere in the output",
+          "passed": true,
+          "evidence": "No setTimeout in user-card.ts or user-card.html"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "time_seconds": 59.4,
+        "tokens": 19464,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Recommends extracting a standalone reusable AlertComponent",
+          "passed": true,
+          "evidence": "`standalone: true` AlertComponent created with selector `app-alert`"
+        },
+        {
+          "text": "The proposed component uses input() signal for message",
+          "passed": true,
+          "evidence": "Line 37: `message = input<string | null>(null)` and `type = input<\"error\" | \"success\" | \"info\">(\"error\")`"
+        },
+        {
+          "text": "The component encapsulates the @if(message()) \u2014 callers don't need the @if",
+          "passed": true,
+          "evidence": "Template line 8: `@if (message()) {` \u2014 the guard is inside the component"
+        },
+        {
+          "text": "No duplicate 'alert' CSS class (avoids [class]=\"'alert ' + type()\" anti-pattern)",
+          "passed": false,
+          "evidence": "Line 9: `[class]=\"'alert ' + type()\"` \u2014 introduces the duplicate class bug; static `class` attribute is absent here but the pattern is fragile and incorrect"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "time_seconds": 31.0,
+        "tokens": 10438,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Correctly identifies takeUntilDestroyed as unnecessary on HTTP calls (HTTP observables auto-complete)",
+          "passed": false,
+          "evidence": "response.md: \"Passer destroyRef explicitement en argument permet d'utiliser takeUntilDestroyed en dehors du contexte d'injection... Ce n'est pas un bug.\" \u2014 WRONG: validates unnecessary cleanup operator on HTTP"
+        },
+        {
+          "text": "Recommends moving HttpClient call to a service",
+          "passed": false,
+          "evidence": "corrected.ts: `private http = inject(HttpClient)` remains in the component \u2014 no service extraction"
+        },
+        {
+          "text": "Suggests toSignal() or resource() as a better pattern",
+          "passed": true,
+          "evidence": "corrected.ts: `users = toSignal(this.http.get<User[]>('/api/users'), { initialValue: [] })`"
+        },
+        {
+          "text": "Does NOT validate the original code as correct",
+          "passed": true,
+          "evidence": "response.md: \"Verdict: incorrect (bug bloquant)\" \u2014 flags the missing inject(HttpClient)"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.1667,
+        "passed": 1,
+        "failed": 5,
+        "total": 6,
+        "time_seconds": 32.2,
+        "tokens": 11431,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Uses viewChild() signal instead of @ViewChild decorator",
+          "passed": false,
+          "evidence": "Line 71: `@ViewChild(\"cardContainer\") cardContainer!: ElementRef<HTMLDivElement>;` \u2014 uses old decorator"
+        },
+        {
+          "text": "Uses afterNextRender() instead of setTimeout",
+          "passed": false,
+          "evidence": "Lines 73-79: `ngAfterViewInit(): void { setTimeout(() => { ... }, 0); }` \u2014 uses setTimeout"
+        },
+        {
+          "text": "Uses input() / output() signals instead of @Input / @Output decorators",
+          "passed": false,
+          "evidence": "Lines 65-69: `@Input() name!: string`, `@Input() date!: string`, `@Output() delete = new EventEmitter<void>()`"
+        },
+        {
+          "text": "Declares ChangeDetectionStrategy.OnPush",
+          "passed": false,
+          "evidence": "No OnPush in the component decorator"
+        },
+        {
+          "text": "Standalone: true \u2014 no NgModule",
+          "passed": true,
+          "evidence": "Line 13: `standalone: true` is present"
+        },
+        {
+          "text": "No setTimeout anywhere in the output",
+          "passed": false,
+          "evidence": "Line 74: `setTimeout(() => { ... }, 0)`"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 39.5,
+        "stddev": 9.755,
+        "min": 28.5,
+        "max": 47.1
+      },
+      "tokens": {
+        "mean": 11898.6667,
+        "stddev": 2204.356,
+        "min": 10194,
+        "max": 14388
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.4722,
+        "stddev": 0.2926,
+        "min": 0.1667,
+        "max": 0.75
+      },
+      "time_seconds": {
+        "mean": 40.8667,
+        "stddev": 16.0615,
+        "min": 31.0,
+        "max": 59.4
+      },
+      "tokens": {
+        "mean": 13777.6667,
+        "stddev": 4949.475,
+        "min": 10438,
+        "max": 19464
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.53",
+      "time_seconds": "-1.4",
+      "tokens": "-1879"
+    }
+  },
+  "notes": []
+}

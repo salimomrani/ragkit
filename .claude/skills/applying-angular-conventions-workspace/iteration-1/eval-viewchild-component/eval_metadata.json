@@ -1,0 +1,15 @@
+{
+  "eval_id": 1,
+  "eval_name": "viewchild-component",
+  "prompt": "Crée un composant Angular standalone `UserCard` qui affiche un nom (string) et une date (string ISO), avec un bouton Supprimer. Utilise @ViewChild, DecimalPipe, et setTimeout pour scroller vers le bas après le rendu.",
+  "assertions": [
+    { "text": "Uses viewChild() signal instead of @ViewChild decorator" },
+    { "text": "Uses afterNextRender() instead of setTimeout" },
+    {
+      "text": "Uses input() / output() signals instead of @Input / @Output decorators"
+    },
+    { "text": "Declares ChangeDetectionStrategy.OnPush" },
+    { "text": "Standalone: true — no NgModule" },
+    { "text": "No setTimeout anywhere in the output" }
+  ]
+}

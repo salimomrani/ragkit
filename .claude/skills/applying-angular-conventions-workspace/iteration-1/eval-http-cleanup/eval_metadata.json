@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "eval_name": "http-cleanup",
+  "prompt": "Est-ce que ce code Angular est correct ?\n\n```typescript\nexport class UserListComponent implements OnInit {\n  private destroyRef = inject(DestroyRef);\n  users = signal<User[]>([]);\n\n  ngOnInit() {\n    this.http.get<User[]>('/api/users')\n      .pipe(takeUntilDestroyed(this.destroyRef))\n      .subscribe(data => this.users.set(data));\n  }\n}\n```",
+  "assertions": [
+    {
+      "text": "Correctly identifies takeUntilDestroyed as unnecessary on HTTP calls (HTTP observables auto-complete)"
+    },
+    { "text": "Recommends moving HttpClient call to a service" },
+    { "text": "Suggests toSignal() or resource() as a better pattern" },
+    { "text": "Does NOT validate the original code as correct" }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "Correctly identifies takeUntilDestroyed as unnecessary on HTTP calls (HTTP observables auto-complete)",
+      "passed": true,
+      "evidence": "response.md: \"HttpClient.get() est un observable fini \u2014 il complete automatiquement... Ajouter takeUntilDestroyed est du bruit inutile\""
+    },
+    {
+      "text": "Recommends moving HttpClient call to a service",
+      "passed": true,
+      "evidence": "corrected.ts: Creates `UserService` with `@Injectable({ providedIn: 'root' })` and moves `http.get` there"
+    },
+    {
+      "text": "Suggests toSignal() or resource() as a better pattern",
+      "passed": true,
+      "evidence": "corrected.ts: Uses `resource({ loader: () => firstValueFrom(this.userService.getAll$()) })`"
+    },
+    {
+      "text": "Does NOT validate the original code as correct",
+      "passed": true,
+      "evidence": "response.md header: \"Verdict : NON conforme aux conventions Angular\""
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  }
+}
