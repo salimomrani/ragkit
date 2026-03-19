@@ -7,7 +7,7 @@
 
 ## Summary
 
-Add persistent, multi-session chat history to the PALO RAG application. Each browser session is tagged with a client-generated UUID (`session_id`) sent with every query. The backend persists the `session_id` alongside existing `query_log` entries (minimal schema change: one new nullable column). Three new API endpoints expose conversation list, detail, and delete. The Angular frontend adds a slide-in history panel within the Chat view, backed by a new `ConversationService`.
+Add persistent, multi-session chat history to the RagKit application. Each browser session is tagged with a client-generated UUID (`session_id`) sent with every query. The backend persists the `session_id` alongside existing `query_log` entries (minimal schema change: one new nullable column). Three new API endpoints expose conversation list, detail, and delete. The Angular frontend adds a slide-in history panel within the Chat view, backed by a new `ConversationService`.
 
 ---
 

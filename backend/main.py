@@ -19,7 +19,7 @@ from core.logging import get_logger
 
 logger = get_logger(__name__)
 
-app = FastAPI(title="PALO RAG API", version="1.0.0", redoc_url=None)
+app = FastAPI(title="RagKit API", version="1.0.0", redoc_url=None)
 
 app.add_middleware(
     CORSMiddleware,
@@ -40,4 +40,4 @@ def health():
     return {"status": "ok"}
 
 
-logger.info("PALO RAG API started")
+logger.info("RagKit API started")

@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     llm_model: str = "qwen2.5:7b"
     embed_model: str = "mxbai-embed-large"
     chroma_path: str = "./chroma_data"
-    db_url: str = "postgresql://palo:palo@localhost:5444/palo_rag"
+    db_url: str = "postgresql://palo:palo@localhost:5444/ragkit"
 
     # LLM tuning
     llm_temperature: float = 0.1
