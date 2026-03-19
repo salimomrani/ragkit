@@ -6,7 +6,7 @@ Templates requiring updates: ✅ all templates consistent with principles
 Deferred TODOs: none
 -->
 
-# PALO RAG Constitution
+# RagKit Constitution
 
 ## Core Principles
 

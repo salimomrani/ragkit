@@ -1,6 +1,6 @@
-# PALO RAG — Enterprise Knowledge Assistant
+# RagKit — Enterprise Knowledge Assistant
 
-[![CI](https://github.com/salimomrani/palo-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/salimomrani/palo-rag/actions/workflows/ci.yml)
+[![CI](https://github.com/salimomrani/ragkit/actions/workflows/ci.yml/badge.svg)](https://github.com/salimomrani/ragkit/actions/workflows/ci.yml)
 
 RAG API + Angular UI for enterprise knowledge bases — answers questions from internal documents, refuses when confidence is too low.
 

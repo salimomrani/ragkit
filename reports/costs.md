@@ -1,4 +1,4 @@
-# Cost Report — PALO RAG Knowledge Assistant
+# Cost Report — RagKit Knowledge Assistant
 
 ---
 

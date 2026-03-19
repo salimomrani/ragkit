@@ -1,7 +1,7 @@
-# PALO RAG — Core Rules & Context
+# RagKit — Core Rules & Context
 
 <purpose>
-Ce fichier sert de guide de référence principal pour Claude Code lors des sessions de développement sur le projet PALO RAG. Il définit les protocoles de workflow, les standards techniques et les limites architecturales.
+Ce fichier sert de guide de référence principal pour Claude Code lors des sessions de développement sur le projet RagKit. Il définit les protocoles de workflow, les standards techniques et les limites architecturales.
 </purpose>
 
 ## 📂 Project Context & Files

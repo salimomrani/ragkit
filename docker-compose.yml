@@ -4,13 +4,13 @@ services:
     environment:
       POSTGRES_USER: palo
       POSTGRES_PASSWORD: palo
-      POSTGRES_DB: palo_rag
+      POSTGRES_DB: ragkit
     ports:
       - "5444:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U palo -d palo_rag"]
+      test: ["CMD-SHELL", "pg_isready -U palo -d ragkit"]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -189,7 +189,7 @@ OLLAMA_BASE_URL=http://localhost:11434
 LLM_MODEL=llama3.2
 EMBED_MODEL=nomic-embed-text
 CHROMA_PATH=./chroma_data
-DB_URL=postgresql://palo:palo@localhost:5444/palo_rag
+DB_URL=postgresql://palo:palo@localhost:5444/ragkit
 ```
 
 **Step 4:** Create `backend/pytest.ini`:
@@ -244,7 +244,7 @@ Create 15 Markdown files in `corpus/`:
 
 Each file MUST contain enough content (300-600 words) for meaningful chunking and retrieval.
 
-**Step 1:** Create all 15 corpus files (see full content in design doc `docs/plans/2026-02-19-palo-rag-design.md`)
+**Step 1:** Create all 15 corpus files (see full content in design doc `docs/plans/2026-02-19-ragkit-design.md`)
 
 **Step 2:** Commit:
 
@@ -961,7 +961,7 @@ def get_vectorstore():
 
 @lru_cache
 def get_engine():
-    db_url = os.getenv("DB_URL", "postgresql://palo:palo@localhost:5444/palo_rag")
+    db_url = os.getenv("DB_URL", "postgresql://palo:palo@localhost:5444/ragkit")
     from models.db import Base
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
@@ -1112,7 +1112,7 @@ from api.query import router as query_router
 from api.logs import router as logs_router
 from api.evaluation import router as evaluation_router
 
-app = FastAPI(title="PALO RAG API", version="1.0.0")
+app = FastAPI(title="RagKit API", version="1.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:4200"], allow_methods=["*"], allow_headers=["*"])
 app.include_router(ingest_router)
 app.include_router(query_router)
