@@ -5,18 +5,12 @@
 - **Primary Source of Truth**: Codebase > `specs/` > `DECISIONS.md`.
 - **Architecture**: `.specify/memory/constitution.md` (À lire impérativement avant toute décision structurante).
 - **Tech Stack**: Angular (Frontend), Python/FastAPI (Backend), PostgreSQL 16 (DB), Ollama (LLM Local).
+- **Stack-specific rules**: See `.claude/rules/backend.md` and `.claude/rules/frontend.md` (loaded automatically by path).
 
 ## Workflow Routing (Mandatory)
 
 - **Feature / Non-trivial change**: Utiliser systématiquement `/speckit.workflow`.
 - **Small fix**: (Typo, wording, < 5 lignes) -> Edition directe autorisée sans spec.
-- **Frontend**: Appliquer le skill `applying-angular-conventions`.
-- **Backend**: Appliquer le skill `applying-python-conventions`.
-
-## Test Commands
-
-- Backend : `cd backend && .venv/bin/pytest tests/ -v`
-- Frontend : `cd frontend && npm test -- --watch=false`
 
 ## Architectural Constraints
 
@@ -25,17 +19,10 @@
 3. **Transparent failure** : Préférer "Je ne sais pas" à l'hallucination.
 4. **Separation of concerns** : Isolation stricte entre RAG, Guardrails et Modules d'évaluation.
 
-## Environment & Commands
+## Environment
 
-- **Venv** : `python` en shell = Anaconda — toujours utiliser `backend/.venv/bin/python` / `backend/.venv/bin/uvicorn` explicitement.
-- **Setup** : Si `backend/.env` est absent, copier `backend/.env.example`.
 - **Docker** : `docker-compose up -d` (PostgreSQL sur port 5444).
-- **Run Dev** :
-  - Backend : `cd backend && .venv/bin/uvicorn main:app --reload --port 8000`
-  - Frontend : `cd frontend && npm start`
-- **Linting** :
-  - Backend : `.venv/bin/ruff check .`
-  - Frontend : `npm run lint`
+- **Ports** : Backend 8000 | Frontend 4200 | PostgreSQL 5444.
 
 ## Error Handling & Stuck Protocol
 
